@@ -30,5 +30,11 @@ namespace AICareerHub.API.Repositories
 
             return user;
         }
+
+        public async Task<bool> EmailExistsAsync(string email)
+        {
+            return await _context.Users
+                .AnyAsync(user => user.Email.ToLower() == email.ToLower());
+        }
     }
 }
