@@ -36,5 +36,24 @@ namespace AICareerHub.API.Repositories
             return await _context.Users
                 .AnyAsync(user => user.Email.ToLower() == email.ToLower());
         }
+
+        public async Task<User?> GetByEmailAsync(string email)
+        {
+            return await _context.Users
+                .FirstOrDefaultAsync(user => user.Email == email);
+        }
+
+        public async Task<User> UpdateAsync(User user)
+        {
+            _context.Users.Update(user);
+            await _context.SaveChangesAsync();
+            return user;
+        }
+
+        public async Task DeleteAsync(User user)
+        {
+            _context.Users.Remove(user);
+            await _context.SaveChangesAsync();
+        }
     }
 }

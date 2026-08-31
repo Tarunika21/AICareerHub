@@ -14,15 +14,21 @@ namespace AICareerHub.API.Common
             var statusCode = exception switch
             {
                 ConflictException => StatusCodes.Status409Conflict,
+                UnauthorizedAccessException => StatusCodes.Status401Unauthorized,
                 _ => StatusCodes.Status500InternalServerError
+            };
+
+            var title = statusCode switch
+            {
+                StatusCodes.Status409Conflict => "Conflict",
+                StatusCodes.Status401Unauthorized => "Unauthorized",
+                _ => "An unexpected error occurred"
             };
 
             var problemDetails = new ProblemDetails
             {
                 Status = statusCode,
-                Title = statusCode == 409
-                    ? "Conflict"
-                    : "An unexpected error occurred",
+                Title = title,
                 Detail = exception.Message
             };
 

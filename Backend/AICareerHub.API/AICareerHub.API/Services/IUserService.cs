@@ -8,6 +8,10 @@ namespace AICareerHub.API.Services
 
         Task<UserDto?> GetUserByIdAsync(Guid id);
 
-        Task<UserDto> CreateUserAsync(CreateUserDto createUserDto);
+        Task<UserDto?> UpdateUserAsync(Guid id, UpdateUserDto updateUserDto);
+
+        Task<bool> ChangePasswordAsync(Guid id, ChangePasswordDto changePasswordDto);
+
+        Task<bool> DeleteUserAsync(Guid id);
     }
 }

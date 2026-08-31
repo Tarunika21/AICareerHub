@@ -1,17 +1,21 @@
-﻿using AICareerHub.API.DTOs;
+﻿using AICareerHub.API.Common.Exceptions;
+using AICareerHub.API.DTOs;
 using AICareerHub.API.Models;
 using AICareerHub.API.Repositories;
-using AICareerHub.API.Common.Exceptions;
+using Microsoft.AspNetCore.Identity;
 
 namespace AICareerHub.API.Services
 {
     public class UserService : IUserService
     {
         private readonly IUserRepository _userRepository;
-
-        public UserService(IUserRepository userRepository)
+        private readonly IPasswordHasher<User> _passwordHasher;
+        public UserService(
+            IUserRepository userRepository,
+            IPasswordHasher<User> passwordHasher)
         {
             _userRepository = userRepository;
+            _passwordHasher = passwordHasher;
         }
 
         public async Task<IEnumerable<UserDto>> GetAllUsersAsync()
@@ -47,34 +51,74 @@ namespace AICareerHub.API.Services
             };
         }
 
-        public async Task<UserDto> CreateUserAsync(CreateUserDto createUserDto)
+        public async Task<UserDto?> UpdateUserAsync(Guid id, UpdateUserDto updateUserDto)
         {
-            var emailExists = await _userRepository.EmailExistsAsync(createUserDto.Email);
+            var user = await _userRepository.GetByIdAsync(id);
 
-            if (emailExists)
+            if (user == null)
             {
-                throw new ConflictException("Email address is already registered.");
+                return null;
             }
 
-            var user = new User
-            {
-                Id = Guid.NewGuid(),
-                FirstName = createUserDto.FirstName,
-                LastName = createUserDto.LastName,
-                Email = createUserDto.Email,
-                CreatedAt = DateTime.UtcNow
-            };
+            user.FirstName = updateUserDto.FirstName.Trim();
+            user.LastName = updateUserDto.LastName.Trim();
 
-            var createdUser = await _userRepository.CreateAsync(user);
+            var updatedUser = await _userRepository.UpdateAsync(user);
 
             return new UserDto
             {
-                Id = createdUser.Id,
-                FirstName = createdUser.FirstName,
-                LastName = createdUser.LastName,
-                Email = createdUser.Email,
-                CreatedAt = createdUser.CreatedAt
+                Id = updatedUser.Id,
+                FirstName = updatedUser.FirstName,
+                LastName = updatedUser.LastName,
+                Email = updatedUser.Email,
+                CreatedAt = updatedUser.CreatedAt
             };
+        }
+
+        public async Task<bool> ChangePasswordAsync(
+    Guid id,
+    ChangePasswordDto changePasswordDto)
+        {
+            var user = await _userRepository.GetByIdAsync(id);
+
+            if (user == null)
+            {
+                return false;
+            }
+
+            var verificationResult =
+                _passwordHasher.VerifyHashedPassword(
+                    user,
+                    user.PasswordHash,
+                    changePasswordDto.CurrentPassword);
+
+            if (verificationResult == PasswordVerificationResult.Failed)
+            {
+                throw new UnauthorizedAccessException(
+                    "Current password is incorrect.");
+            }
+
+            user.PasswordHash = _passwordHasher.HashPassword(
+                user,
+                changePasswordDto.NewPassword);
+
+            await _userRepository.UpdateAsync(user);
+
+            return true;
+        }
+
+        public async Task<bool> DeleteUserAsync(Guid id)
+        {
+            var user = await _userRepository.GetByIdAsync(id);
+
+            if (user == null)
+            {
+                return false;
+            }
+
+            await _userRepository.DeleteAsync(user);
+
+            return true;
         }
     }
 }

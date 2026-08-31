@@ -1,9 +1,12 @@
 ﻿using AICareerHub.API.DTOs;
 using AICareerHub.API.Services;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.AspNetCore.Authorization;
+using System.Security.Claims;
 
 namespace AICareerHub.API.Controllers
 {
+    [Authorize]
     [ApiController]
     [Route("api/[controller]")]
     public class UsersController : ControllerBase
@@ -15,17 +18,22 @@ namespace AICareerHub.API.Controllers
             _userService = userService;
         }
 
-        [HttpGet]
-        public async Task<ActionResult<IEnumerable<UserDto>>> GetUsers()
+        [HttpGet("me")]
+        public async Task<ActionResult<UserDto>> GetCurrentUser()
         {
-            var users = await _userService.GetAllUsersAsync();
-            return Ok(users);
-        }
+            var userIdValue = User.FindFirstValue(ClaimTypes.NameIdentifier);
 
-        [HttpGet("{id:guid}")]
-        public async Task<ActionResult<UserDto>> GetUserById(Guid id)
-        {
-            var user = await _userService.GetUserByIdAsync(id);
+            if (string.IsNullOrWhiteSpace(userIdValue))
+            {
+                return Unauthorized();
+            }
+
+            if (!Guid.TryParse(userIdValue, out var userId))
+            {
+                return Unauthorized();
+            }
+
+            var user = await _userService.GetUserByIdAsync(userId);
 
             if (user == null)
             {
@@ -35,17 +43,70 @@ namespace AICareerHub.API.Controllers
             return Ok(user);
         }
 
-        [HttpPost]
-        public async Task<ActionResult<UserDto>> CreateUser(
-            CreateUserDto createUserDto)
+        [HttpPut("me")]
+        public async Task<ActionResult<UserDto>> UpdateCurrentUser(UpdateUserDto updateUserDto)
         {
-            var createdUser =
-                await _userService.CreateUserAsync(createUserDto);
+            var userIdValue = User.FindFirstValue(ClaimTypes.NameIdentifier);
 
-            return CreatedAtAction(
-                nameof(GetUserById),
-                new { id = createdUser.Id },
-                createdUser);
+            if (!Guid.TryParse(userIdValue, out var userId))
+            {
+                return Unauthorized();
+            }
+
+            var updatedUser = await _userService.UpdateUserAsync(userId, updateUserDto);
+
+            if (updatedUser == null)
+            {
+                return NotFound();
+            }
+
+            return Ok(updatedUser);
+        }
+
+        [HttpPut("me/password")]
+        public async Task<IActionResult> ChangePassword(ChangePasswordDto changePasswordDto)
+        {
+            var userIdValue =
+                User.FindFirstValue(ClaimTypes.NameIdentifier);
+
+            if (!Guid.TryParse(userIdValue, out var userId))
+            {
+                return Unauthorized();
+            }
+
+            var changed =
+                await _userService.ChangePasswordAsync(
+                    userId,
+                    changePasswordDto);
+
+            if (!changed)
+            {
+                return NotFound();
+            }
+
+            return NoContent();
+        }
+
+        [HttpDelete("me")]
+        public async Task<IActionResult> DeleteCurrentUser()
+        {
+            var userIdValue =
+                User.FindFirstValue(ClaimTypes.NameIdentifier);
+
+            if (!Guid.TryParse(userIdValue, out var userId))
+            {
+                return Unauthorized();
+            }
+
+            var deleted =
+                await _userService.DeleteUserAsync(userId);
+
+            if (!deleted)
+            {
+                return NotFound();
+            }
+
+            return NoContent();
         }
     }
 }
