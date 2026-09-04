@@ -12,6 +12,8 @@ namespace AICareerHub.API.Data
 
         public DbSet<User> Users { get; set; }
 
+        public DbSet<CareerProfile> CareerProfiles { get; set; }
+
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
             base.OnModelCreating(modelBuilder);
@@ -19,6 +21,12 @@ namespace AICareerHub.API.Data
             modelBuilder.Entity<User>()
                 .HasIndex(user => user.Email)
                 .IsUnique();
+
+            modelBuilder.Entity<CareerProfile>()
+                .HasOne(profile => profile.User)
+                .WithOne(user => user.CareerProfile)
+                .HasForeignKey<CareerProfile>(
+                    profile => profile.UserId);
         }
     }
 }
