@@ -15,6 +15,7 @@ namespace AICareerHub.API.Common
             {
                 ConflictException => StatusCodes.Status409Conflict,
                 UnauthorizedAccessException => StatusCodes.Status401Unauthorized,
+                ArgumentException => StatusCodes.Status400BadRequest,
                 _ => StatusCodes.Status500InternalServerError
             };
 
