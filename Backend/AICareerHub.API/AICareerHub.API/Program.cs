@@ -21,10 +21,12 @@ builder.Services.AddDbContext<ApplicationDbContext>(options =>
 
 builder.Services.AddScoped<IUserRepository, UserRepository>();
 builder.Services.AddScoped<ICareerProfileRepository, CareerProfileRepository>();
+builder.Services.AddScoped<IResumeRepository, ResumeRepository>();
 
 builder.Services.AddScoped<IUserService, UserService>();
 builder.Services.AddScoped<IAuthService, AuthService>();
 builder.Services.AddScoped<ICareerProfileService, CareerProfileService>();
+builder.Services.AddScoped<IResumeService, ResumeService>();
 
 builder.Services.AddScoped<IPasswordHasher<User>, PasswordHasher<User>>();
 

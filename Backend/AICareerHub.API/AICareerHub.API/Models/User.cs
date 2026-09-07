@@ -15,5 +15,7 @@
         public DateTime CreatedAt { get; set; } = DateTime.UtcNow;
 
         public CareerProfile? CareerProfile { get; set; }
+
+        public ICollection<Resume> Resumes { get; set; } = new List<Resume>();
     }
 }
