@@ -23,12 +23,16 @@ builder.Services.AddScoped<IUserRepository, UserRepository>();
 builder.Services.AddScoped<ICareerProfileRepository, CareerProfileRepository>();
 builder.Services.AddScoped<IResumeRepository, ResumeRepository>();
 builder.Services.AddScoped<IResumeExperienceRepository,ResumeExperienceRepository>();
+builder.Services.AddScoped<IResumeProjectRepository,ResumeProjectRepository>();
+builder.Services.AddScoped<IResumeEducationRepository, ResumeEducationRepository>();
 
 builder.Services.AddScoped<IUserService, UserService>();
 builder.Services.AddScoped<IAuthService, AuthService>();
 builder.Services.AddScoped<ICareerProfileService, CareerProfileService>();
 builder.Services.AddScoped<IResumeService, ResumeService>();
 builder.Services.AddScoped<IResumeExperienceService,ResumeExperienceService>();
+builder.Services.AddScoped<IResumeEducationService,ResumeEducationService>();
+builder.Services.AddScoped<IResumeProjectService,ResumeProjectService>();
 
 builder.Services.AddScoped<IPasswordHasher<User>, PasswordHasher<User>>();
 
