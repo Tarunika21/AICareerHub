@@ -1,11 +1,12 @@
+using AICareerHub.API.AI;
+using AICareerHub.API.Common;
 using AICareerHub.API.Data;
-using Microsoft.EntityFrameworkCore;
+using AICareerHub.API.Models;
 using AICareerHub.API.Repositories;
 using AICareerHub.API.Services;
-using AICareerHub.API.Common;
-using AICareerHub.API.Models;
-using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
+using Microsoft.AspNetCore.Identity;
+using Microsoft.EntityFrameworkCore;
 using Microsoft.IdentityModel.Tokens;
 using Microsoft.OpenApi;
 using System.Text;
@@ -33,6 +34,20 @@ builder.Services.AddScoped<IResumeService, ResumeService>();
 builder.Services.AddScoped<IResumeExperienceService,ResumeExperienceService>();
 builder.Services.AddScoped<IResumeEducationService,ResumeEducationService>();
 builder.Services.AddScoped<IResumeProjectService,ResumeProjectService>();
+
+var aiProvider = builder.Configuration["AI:Provider"];
+
+if (aiProvider == "Mock")
+{
+    builder.Services.AddScoped<IAiProvider, MockAiProvider>();
+}
+else
+{
+    throw new InvalidOperationException(
+        $"Unsupported AI provider: {aiProvider}");
+}
+
+builder.Services.AddScoped<IAiService, AiService>();
 
 builder.Services.AddScoped<IPasswordHasher<User>, PasswordHasher<User>>();
 
