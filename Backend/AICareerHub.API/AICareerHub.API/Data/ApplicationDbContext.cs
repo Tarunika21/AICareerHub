@@ -22,6 +22,8 @@ namespace AICareerHub.API.Data
 
         public DbSet<ResumeProject> ResumeProjects { get; set; }
 
+        public DbSet<JobApplication> JobApplications { get; set; }
+
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
             base.OnModelCreating(modelBuilder);
@@ -59,6 +61,36 @@ namespace AICareerHub.API.Data
                 .WithMany(resume => resume.Projects)
                 .HasForeignKey(project => project.ResumeId)
                 .OnDelete(DeleteBehavior.Cascade);
+
+            modelBuilder.Entity<JobApplication>()
+                .HasOne(job => job.User)
+                .WithMany(user => user.JobApplications)
+                .HasForeignKey(job => job.UserId)
+                .OnDelete(DeleteBehavior.Cascade);
+
+            modelBuilder.Entity<JobApplication>()
+                .Property(job => job.CompanyName)
+                .HasMaxLength(150);
+
+            modelBuilder.Entity<JobApplication>()
+                .Property(job => job.JobTitle)
+                .HasMaxLength(150);
+
+            modelBuilder.Entity<JobApplication>()
+                .Property(job => job.Location)
+                .HasMaxLength(150);
+
+            modelBuilder.Entity<JobApplication>()
+                .Property(job => job.Status)
+                .HasMaxLength(50);
+
+            modelBuilder.Entity<JobApplication>()
+                .Property(job => job.JobUrl)
+                .HasMaxLength(500);
+
+            modelBuilder.Entity<JobApplication>()
+                .Property(job => job.Notes)
+                .HasMaxLength(2000);
         }
     }
 }

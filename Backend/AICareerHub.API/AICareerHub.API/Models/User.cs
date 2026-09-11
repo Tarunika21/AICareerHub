@@ -17,5 +17,7 @@
         public CareerProfile? CareerProfile { get; set; }
 
         public ICollection<Resume> Resumes { get; set; } = new List<Resume>();
+
+        public ICollection<JobApplication> JobApplications { get; set; } = new List<JobApplication>();
     }
 }
