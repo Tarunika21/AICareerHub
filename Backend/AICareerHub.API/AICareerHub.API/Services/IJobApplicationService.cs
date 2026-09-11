@@ -22,5 +22,10 @@ namespace AICareerHub.API.Services
         Task<bool> DeleteAsync(
             Guid jobApplicationId,
             Guid userId);
+
+        Task<IEnumerable<JobApplicationDto>> SearchAsync(
+            Guid userId,
+            string? status,
+            string? search);
     }
 }

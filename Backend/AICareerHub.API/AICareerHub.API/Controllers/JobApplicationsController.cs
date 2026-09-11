@@ -19,17 +19,6 @@ namespace AICareerHub.API.Controllers
             _jobApplicationService = jobApplicationService;
         }
 
-        [HttpGet]
-        public async Task<ActionResult<IEnumerable<JobApplicationDto>>> GetAll()
-        {
-            var userId = GetCurrentUserId();
-
-            var jobs =
-                await _jobApplicationService.GetAllAsync(userId);
-
-            return Ok(jobs);
-        }
-
         [HttpGet("{id:guid}")]
         public async Task<ActionResult<JobApplicationDto>> GetById(Guid id)
         {
@@ -114,6 +103,21 @@ namespace AICareerHub.API.Controllers
             }
 
             return userId;
+        }
+
+        [HttpGet]
+        public async Task<ActionResult<IEnumerable<JobApplicationDto>>> GetAll(
+        [FromQuery] string? status,
+        [FromQuery] string? search)
+        {
+            var userId = GetCurrentUserId();
+
+            var jobs = await _jobApplicationService.SearchAsync(
+                userId,
+                status,
+                search);
+
+            return Ok(jobs);
         }
     }
 }

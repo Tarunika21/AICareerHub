@@ -15,5 +15,10 @@ namespace AICareerHub.API.Repositories
         Task<JobApplication> UpdateAsync(JobApplication jobApplication);
 
         Task DeleteAsync(JobApplication jobApplication);
+
+        Task<IEnumerable<JobApplication>> SearchAsync(
+            Guid userId,
+            string? status,
+            string? search);
     }
 }

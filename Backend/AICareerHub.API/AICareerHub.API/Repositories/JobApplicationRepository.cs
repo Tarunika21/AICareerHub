@@ -58,5 +58,35 @@ namespace AICareerHub.API.Repositories
 
             await _context.SaveChangesAsync();
         }
+
+        public async Task<IEnumerable<JobApplication>> SearchAsync(
+            Guid userId,
+            string? status,
+            string? search)
+        {
+            var query = _context.JobApplications
+                .Where(job => job.UserId == userId)
+                .AsQueryable();
+
+            if (!string.IsNullOrWhiteSpace(status))
+            {
+                query = query.Where(job =>
+                    job.Status.ToLower() == status.Trim().ToLower());
+            }
+
+            if (!string.IsNullOrWhiteSpace(search))
+            {
+                var searchValue = search.Trim().ToLower();
+
+                query = query.Where(job =>
+                    job.CompanyName.ToLower().Contains(searchValue) ||
+                    job.JobTitle.ToLower().Contains(searchValue) ||
+                    job.Location.ToLower().Contains(searchValue));
+            }
+
+            return await query
+                .OrderByDescending(job => job.AppliedDate)
+                .ToListAsync();
+        }
     }
 }

@@ -157,5 +157,23 @@ namespace AICareerHub.API.Services
                 UpdatedAt = job.UpdatedAt
             };
         }
+
+        public async Task<IEnumerable<JobApplicationDto>> SearchAsync(
+            Guid userId,
+            string? status,
+            string? search)
+        {
+            if (!string.IsNullOrWhiteSpace(status))
+            {
+                ValidateStatus(status);
+            }
+
+            var jobs = await _repository.SearchAsync(
+                userId,
+                status,
+                search);
+
+            return jobs.Select(MapToDto);
+        }
     }
 }
