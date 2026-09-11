@@ -1,4 +1,5 @@
 ﻿using AICareerHub.API.Data;
+using AICareerHub.API.DTOs;
 using AICareerHub.API.Models;
 using Microsoft.EntityFrameworkCore;
 
@@ -87,6 +88,22 @@ namespace AICareerHub.API.Repositories
             return await query
                 .OrderByDescending(job => job.AppliedDate)
                 .ToListAsync();
+        }
+
+        public async Task<JobApplicationStatsDto> GetStatsAsync(Guid userId)
+        {
+            var jobs = _context.JobApplications
+                .Where(job => job.UserId == userId);
+
+            return new JobApplicationStatsDto
+            {
+                Total = await jobs.CountAsync(),
+                Applied = await jobs.CountAsync(job => job.Status == "Applied"),
+                Interview = await jobs.CountAsync(job => job.Status == "Interview"),
+                Offer = await jobs.CountAsync(job => job.Status == "Offer"),
+                Rejected = await jobs.CountAsync(job => job.Status == "Rejected"),
+                Withdrawn = await jobs.CountAsync(job => job.Status == "Withdrawn")
+            };
         }
     }
 }

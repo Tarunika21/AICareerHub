@@ -175,5 +175,10 @@ namespace AICareerHub.API.Services
 
             return jobs.Select(MapToDto);
         }
+
+        public async Task<JobApplicationStatsDto> GetStatsAsync(Guid userId)
+        {
+            return await _repository.GetStatsAsync(userId);
+        }
     }
 }

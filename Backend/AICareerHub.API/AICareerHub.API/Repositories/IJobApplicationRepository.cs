@@ -1,4 +1,5 @@
-﻿using AICareerHub.API.Models;
+﻿using AICareerHub.API.DTOs;
+using AICareerHub.API.Models;
 
 namespace AICareerHub.API.Repositories
 {
@@ -20,5 +21,7 @@ namespace AICareerHub.API.Repositories
             Guid userId,
             string? status,
             string? search);
+
+        Task<JobApplicationStatsDto> GetStatsAsync(Guid userId);
     }
 }

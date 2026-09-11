@@ -27,5 +27,7 @@ namespace AICareerHub.API.Services
             Guid userId,
             string? status,
             string? search);
+
+        Task<JobApplicationStatsDto> GetStatsAsync(Guid userId);
     }
 }

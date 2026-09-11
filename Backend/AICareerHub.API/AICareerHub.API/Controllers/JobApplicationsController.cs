@@ -119,5 +119,15 @@ namespace AICareerHub.API.Controllers
 
             return Ok(jobs);
         }
+
+        [HttpGet("stats")]
+        public async Task<ActionResult<JobApplicationStatsDto>> GetStats()
+        {
+            var userId = GetCurrentUserId();
+
+            var stats = await _jobApplicationService.GetStatsAsync(userId);
+
+            return Ok(stats);
+        }
     }
 }
