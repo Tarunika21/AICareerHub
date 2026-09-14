@@ -1,1 +1,95 @@
-<p>register works!</p>
+<div class="register-container">
+  <div class="register-card">
+
+    <h1>AI Career Hub</h1>
+    <h2>Create your account</h2>
+
+    <form [formGroup]="registerForm" (ngSubmit)="onSubmit()">
+
+      <div class="form-group">
+        <label for="firstName">First name</label>
+        <input
+          id="firstName"
+          type="text"
+          formControlName="firstName"
+          placeholder="Enter your first name"
+        />
+
+        @if (
+          registerForm.controls.firstName.touched &&
+          registerForm.controls.firstName.invalid
+        ) {
+          <small>First name is required.</small>
+        }
+      </div>
+
+      <div class="form-group">
+        <label for="lastName">Last name</label>
+        <input
+          id="lastName"
+          type="text"
+          formControlName="lastName"
+          placeholder="Enter your last name"
+        />
+
+        @if (
+          registerForm.controls.lastName.touched &&
+          registerForm.controls.lastName.invalid
+        ) {
+          <small>Last name is required.</small>
+        }
+      </div>
+
+      <div class="form-group">
+        <label for="email">Email</label>
+        <input
+          id="email"
+          type="email"
+          formControlName="email"
+          placeholder="Enter your email"
+        />
+
+        @if (
+          registerForm.controls.email.touched &&
+          registerForm.controls.email.invalid
+        ) {
+          <small>Please enter a valid email.</small>
+        }
+      </div>
+
+      <div class="form-group">
+        <label for="password">Password</label>
+        <input
+          id="password"
+          type="password"
+          formControlName="password"
+          placeholder="Minimum 8 characters"
+        />
+
+        @if (
+          registerForm.controls.password.touched &&
+          registerForm.controls.password.invalid
+        ) {
+          <small>Password must contain at least 8 characters.</small>
+        }
+      </div>
+
+      @if (errorMessage) {
+        <p class="error-message">
+          {{ errorMessage }}
+        </p>
+      }
+
+      <button type="submit" [disabled]="isLoading">
+        {{ isLoading ? 'Creating account...' : 'Create account' }}
+      </button>
+
+    </form>
+
+    <p>
+      Already have an account?
+      <a routerLink="/login">Login</a>
+    </p>
+
+  </div>
+</div>
