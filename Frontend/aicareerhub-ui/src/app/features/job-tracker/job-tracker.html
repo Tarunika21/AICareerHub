@@ -1,1 +1,81 @@
-<p>job-tracker works!</p>
+<app-navbar></app-navbar>
+
+<main class="job-tracker">
+
+  <div class="page-header">
+    <div>
+      <h1>Job Tracker</h1>
+      <p>Manage and track your job applications.</p>
+    </div>
+  </div>
+
+  @if (isLoading) {
+    <p>Loading applications...</p>
+  }
+
+  @if (errorMessage) {
+    <p class="error-message">
+      {{ errorMessage }}
+    </p>
+  }
+
+  @if (!isLoading && !errorMessage) {
+
+    @if (applications.length === 0) {
+
+      <div class="empty-state">
+        <h2>No job applications yet</h2>
+        <p>
+          Add your first application to start tracking
+          your job search.
+        </p>
+      </div>
+
+    } @else {
+
+      <div class="applications-list">
+
+        @for (application of applications; track application.id) {
+
+          <div class="application-card">
+
+            <h2>{{ application.jobTitle }}</h2>
+
+            <p>
+              <strong>Company:</strong>
+              {{ application.companyName }}
+            </p>
+
+            <p>
+              <strong>Location:</strong>
+              {{ application.location }}
+            </p>
+
+            <p>
+              <strong>Status:</strong>
+              {{ application.status }}
+            </p>
+
+            <p>
+              <strong>Applied:</strong>
+              {{ application.appliedDate }}
+            </p>
+
+            @if (application.jobUrl) {
+              <a
+                [href]="application.jobUrl"
+                target="_blank"
+                rel="noopener noreferrer">
+                View Job
+              </a>
+            }
+
+          </div>
+
+        }
+
+      </div>
+    }
+  }
+
+</main>

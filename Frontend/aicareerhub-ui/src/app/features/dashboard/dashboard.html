@@ -1,6 +1,56 @@
 <app-navbar></app-navbar>
 
-<main>
+<main class="dashboard">
+
   <h1>Dashboard</h1>
-  <p>Welcome to AI Career Hub.</p>
+  <p class="subtitle">
+    Track your job application progress.
+  </p>
+
+  @if (isLoading) {
+    <p>Loading dashboard...</p>
+  }
+
+  @if (errorMessage) {
+    <p class="error-message">
+      {{ errorMessage }}
+    </p>
+  }
+
+  @if (stats) {
+    <div class="stats-grid">
+
+      <div class="stat-card">
+        <h3>Total Applications</h3>
+        <p>{{ stats.total }}</p>
+      </div>
+
+      <div class="stat-card">
+        <h3>Applied</h3>
+        <p>{{ stats.applied }}</p>
+      </div>
+
+      <div class="stat-card">
+        <h3>Interviews</h3>
+        <p>{{ stats.interview }}</p>
+      </div>
+
+      <div class="stat-card">
+        <h3>Offers</h3>
+        <p>{{ stats.offer }}</p>
+      </div>
+
+      <div class="stat-card">
+        <h3>Rejected</h3>
+        <p>{{ stats.rejected }}</p>
+      </div>
+
+      <div class="stat-card">
+        <h3>Withdrawn</h3>
+        <p>{{ stats.withdrawn }}</p>
+      </div>
+
+    </div>
+  }
+
 </main>
