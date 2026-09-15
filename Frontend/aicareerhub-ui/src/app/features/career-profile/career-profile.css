@@ -1,0 +1,53 @@
+.career-profile {
+  padding: 24px;
+}
+
+.page-header {
+  margin-bottom: 24px;
+}
+
+.profile-section {
+  max-width: 750px;
+  padding: 24px;
+  border: 1px solid #e5e7eb;
+  border-radius: 12px;
+}
+
+.form-group {
+  margin-bottom: 18px;
+}
+
+.form-group label {
+  display: block;
+  margin-bottom: 6px;
+}
+
+.form-group input,
+.form-group textarea {
+  width: 100%;
+  box-sizing: border-box;
+  padding: 10px;
+}
+
+.form-group textarea {
+  min-height: 100px;
+}
+
+.form-actions {
+  margin-top: 20px;
+}
+
+small,
+.error-message {
+  color: #b42318;
+}
+
+.field-hint {
+  display: block;
+  margin-top: 4px;
+  color: #667085;
+}
+
+.success-message {
+  color: #067647;
+}

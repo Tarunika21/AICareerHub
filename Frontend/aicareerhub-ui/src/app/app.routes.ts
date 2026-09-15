@@ -4,7 +4,7 @@ import { Register } from './features/auth/register/register';
 import { Dashboard } from './features/dashboard/dashboard';
 import { JobTracker } from './features/job-tracker/job-tracker';
 import { authGuard } from './core/guards/auth.guard';
-
+import { CareerProfile } from './features/career-profile/career-profile';
 export const routes: Routes = [
   { path: '', redirectTo: 'login', pathMatch: 'full' },
 
@@ -19,6 +19,11 @@ export const routes: Routes = [
   {
     path: 'job-tracker',
     component: JobTracker,
+    canActivate: [authGuard]
+  },
+  {
+    path: 'career-profile',
+    component: CareerProfile,
     canActivate: [authGuard]
   },
 

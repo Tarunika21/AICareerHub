@@ -1,1 +1,184 @@
-<p>career-profile works!</p>
+<app-navbar></app-navbar>
+
+<main class="career-profile">
+  <div class="page-header">
+    <h1>Career Profile</h1>
+
+    <p>Manage your professional information and career preferences.</p>
+  </div>
+
+  @if (isLoading) {
+    <p>Loading career profile...</p>
+  }
+
+  @if (errorMessage) {
+    <p class="error-message">
+      {{ errorMessage }}
+    </p>
+  }
+
+  @if (!isLoading) {
+    <section class="profile-section">
+      <form [formGroup]="profileForm" (ngSubmit)="saveProfile()">
+        <!-- Current Job Title -->
+
+        <div class="form-group">
+          <label for="currentJobTitle"> Current Job Title </label>
+
+          <input
+            id="currentJobTitle"
+            type="text"
+            formControlName="currentJobTitle"
+            placeholder="e.g. Software Engineer"
+          />
+
+          @if (
+            profileForm.controls.currentJobTitle.touched &&
+            profileForm.controls.currentJobTitle.invalid
+          ) {
+            <small> Current job title is required. </small>
+          }
+        </div>
+
+        <!-- Years of Experience -->
+
+        <div class="form-group">
+          <label for="yearsOfExperience"> Years of Experience </label>
+
+          <input
+            id="yearsOfExperience"
+            type="number"
+            step="0.1"
+            min="0"
+            max="60"
+            formControlName="yearsOfExperience"
+          />
+
+          @if (
+            profileForm.controls.yearsOfExperience.touched &&
+            profileForm.controls.yearsOfExperience.invalid
+          ) {
+            <small> Enter experience between 0 and 60 years. </small>
+          }
+        </div>
+
+        <!-- Skills -->
+
+        <div class="form-group">
+          <label for="skills"> Skills </label>
+
+          <textarea
+            id="skills"
+            formControlName="skills"
+            placeholder="Angular, React, ASP.NET Core, PostgreSQL"
+          >
+          </textarea>
+
+          @if (profileForm.controls.skills.touched && profileForm.controls.skills.invalid) {
+            <small> Skills are required. </small>
+          }
+        </div>
+
+        <!-- Current Location -->
+
+        <div class="form-group">
+          <label for="currentLocation"> Current Location </label>
+
+          <input
+            id="currentLocation"
+            type="text"
+            formControlName="currentLocation"
+            placeholder="e.g. Coimbatore"
+          />
+
+          @if (
+            profileForm.controls.currentLocation.touched &&
+            profileForm.controls.currentLocation.invalid
+          ) {
+            <small> Current location is required. </small>
+          }
+        </div>
+
+        <!-- Preferred Locations -->
+
+        <div class="form-group">
+          <label for="preferredLocations"> Preferred Locations </label>
+
+          <input
+            id="preferredLocations"
+            type="text"
+            formControlName="preferredLocations"
+            placeholder="e.g. Remote, Bangalore, Coimbatore"
+          />
+
+          @if (
+            profileForm.controls.preferredLocations.touched &&
+            profileForm.controls.preferredLocations.invalid
+          ) {
+            <small> Preferred locations are required. </small>
+          }
+        </div>
+
+        <!-- Target Role -->
+
+        <div class="form-group">
+          <label for="targetRole"> Target Role </label>
+
+          <input
+            id="targetRole"
+            type="text"
+            formControlName="targetRole"
+            placeholder="e.g. Senior Software Engineer"
+          />
+
+          @if (profileForm.controls.targetRole.touched && profileForm.controls.targetRole.invalid) {
+            <small> Target role is required. </small>
+          }
+        </div>
+
+        <!-- Target Salary -->
+
+        <div class="form-group">
+          <label for="targetSalary"> Target Salary </label>
+
+          <input
+            id="targetSalary"
+            type="number"
+            min="0"
+            formControlName="targetSalary"
+            placeholder="e.g. 2000000"
+          />
+
+          <small class="field-hint"> Enter your expected annual salary. </small>
+        </div>
+
+        <!-- Professional Summary -->
+
+        <div class="form-group">
+          <label for="professionalSummary"> Professional Summary </label>
+
+          <textarea
+            id="professionalSummary"
+            formControlName="professionalSummary"
+            placeholder="Briefly describe your professional experience and career goals"
+          >
+          </textarea>
+        </div>
+
+        <!-- Save -->
+
+        <div class="form-actions">
+          <button type="submit" [disabled]="isSaving">
+            {{ isSaving ? 'Saving...' : profileExists ? 'Update Profile' : 'Create Profile' }}
+          </button>
+        </div>
+      </form>
+
+      @if (successMessage) {
+        <p class="success-message">
+          {{ successMessage }}
+        </p>
+      }
+    </section>
+  }
+</main>
