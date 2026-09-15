@@ -166,4 +166,35 @@ export class JobTracker implements OnInit {
     this.errorMessage = '';
     this.successMessage = '';
   }
+
+  deleteApplication(application: JobApplication): void {
+    const confirmed = window.confirm(
+      `Are you sure you want to delete the application for ${application.jobTitle} at ${application.companyName}?`,
+    );
+
+    if (!confirmed) {
+      return;
+    }
+
+    this.errorMessage = '';
+    this.successMessage = '';
+
+    this.jobApplicationService.delete(application.id).subscribe({
+      next: () => {
+        this.successMessage = 'Job application deleted successfully.';
+
+        // If the deleted application was being edited,
+        // reset the form as well.
+        if (this.editingApplicationId === application.id) {
+          this.editingApplicationId = null;
+          this.resetForm();
+        }
+
+        this.loadApplications();
+      },
+      error: () => {
+        this.errorMessage = 'Unable to delete job application.';
+      },
+    });
+  }
 }
