@@ -1,7 +1,6 @@
 <app-navbar></app-navbar>
 
 <main class="job-tracker">
-
   <!-- Page Header -->
   <div class="page-header">
     <div>
@@ -10,16 +9,13 @@
     </div>
   </div>
 
-
-  <!-- Add Job Application Form -->
+  <!-- Add / Edit Job Application Form -->
   <section class="add-job-section">
+    <h2>
+      {{ editingApplicationId ? 'Edit Job Application' : 'Add Job Application' }}
+    </h2>
 
-    <h2>Add Job Application</h2>
-
-    <form
-      [formGroup]="jobForm"
-      (ngSubmit)="addApplication()">
-
+    <form [formGroup]="jobForm" (ngSubmit)="saveApplication()">
       <!-- Company Name -->
       <div class="form-group">
         <label for="companyName">Company</label>
@@ -31,14 +27,10 @@
           placeholder="e.g. Atlassian"
         />
 
-        @if (
-          jobForm.controls.companyName.touched &&
-          jobForm.controls.companyName.invalid
-        ) {
+        @if (jobForm.controls.companyName.touched && jobForm.controls.companyName.invalid) {
           <small>Company name is required.</small>
         }
       </div>
-
 
       <!-- Job Title -->
       <div class="form-group">
@@ -51,108 +43,73 @@
           placeholder="e.g. Software Engineer"
         />
 
-        @if (
-          jobForm.controls.jobTitle.touched &&
-          jobForm.controls.jobTitle.invalid
-        ) {
+        @if (jobForm.controls.jobTitle.touched && jobForm.controls.jobTitle.invalid) {
           <small>Job title is required.</small>
         }
       </div>
-
 
       <!-- Location -->
       <div class="form-group">
         <label for="location">Location</label>
 
-        <input
-          id="location"
-          type="text"
-          formControlName="location"
-          placeholder="e.g. Remote"
-        />
+        <input id="location" type="text" formControlName="location" placeholder="e.g. Remote" />
 
-        @if (
-          jobForm.controls.location.touched &&
-          jobForm.controls.location.invalid
-        ) {
+        @if (jobForm.controls.location.touched && jobForm.controls.location.invalid) {
           <small>Location is required.</small>
         }
       </div>
-
 
       <!-- Status -->
       <div class="form-group">
         <label for="status">Status</label>
 
-        <select
-          id="status"
-          formControlName="status">
-
+        <select id="status" formControlName="status">
           <option value="Applied">Applied</option>
           <option value="Interview">Interview</option>
           <option value="Offer">Offer</option>
           <option value="Rejected">Rejected</option>
           <option value="Withdrawn">Withdrawn</option>
-
         </select>
       </div>
-
 
       <!-- Applied Date -->
       <div class="form-group">
         <label for="appliedDate">Applied Date</label>
 
-        <input
-          id="appliedDate"
-          type="date"
-          formControlName="appliedDate"
-        />
+        <input id="appliedDate" type="date" formControlName="appliedDate" />
 
-        @if (
-          jobForm.controls.appliedDate.touched &&
-          jobForm.controls.appliedDate.invalid
-        ) {
+        @if (jobForm.controls.appliedDate.touched && jobForm.controls.appliedDate.invalid) {
           <small>Applied date is required.</small>
         }
       </div>
-
 
       <!-- Job URL -->
       <div class="form-group">
         <label for="jobUrl">Job URL</label>
 
-        <input
-          id="jobUrl"
-          type="url"
-          formControlName="jobUrl"
-          placeholder="https://..."
-        />
+        <input id="jobUrl" type="url" formControlName="jobUrl" placeholder="https://..." />
       </div>
-
 
       <!-- Notes -->
       <div class="form-group">
         <label for="notes">Notes</label>
 
-        <textarea
-          id="notes"
-          formControlName="notes"
-          placeholder="Optional notes">
-        </textarea>
+        <textarea id="notes" formControlName="notes" placeholder="Optional notes"> </textarea>
       </div>
 
+      <!-- Form Buttons -->
+      <div class="form-actions">
+        <button type="submit" [disabled]="isSaving">
+          {{
+            isSaving ? 'Saving...' : editingApplicationId ? 'Update Application' : 'Add Application'
+          }}
+        </button>
 
-      <!-- Submit -->
-      <button
-        type="submit"
-        [disabled]="isSaving">
-
-        {{ isSaving ? 'Adding...' : 'Add Application' }}
-
-      </button>
-
+        @if (editingApplicationId) {
+          <button type="button" (click)="cancelEdit()" [disabled]="isSaving">Cancel</button>
+        }
+      </div>
     </form>
-
 
     <!-- Success Message -->
     @if (successMessage) {
@@ -160,15 +117,12 @@
         {{ successMessage }}
       </p>
     }
-
   </section>
-
 
   <!-- Loading -->
   @if (isLoading) {
     <p>Loading applications...</p>
   }
-
 
   <!-- Error -->
   @if (errorMessage) {
@@ -177,92 +131,73 @@
     </p>
   }
 
-
-  <!-- Job Applications -->
+  <!-- Applications -->
   @if (!isLoading && !errorMessage) {
-
     @if (applications.length === 0) {
-
       <!-- Empty State -->
       <div class="empty-state">
-
         <h2>No job applications yet</h2>
 
-        <p>
-          Add your first application to start tracking
-          your job search.
-        </p>
-
+        <p>Add your first application to start tracking your job search.</p>
       </div>
-
     } @else {
-
-      <!-- Applications List -->
+      <!-- Application List -->
       <div class="applications-list">
-
-        @for (
-          application of applications;
-          track application.id
-        ) {
-
+        @for (application of applications; track application.id) {
           <div class="application-card">
-
+            <!-- Job Title -->
             <h2>
               {{ application.jobTitle }}
             </h2>
 
+            <!-- Company -->
             <p>
               <strong>Company:</strong>
               {{ application.companyName }}
             </p>
 
+            <!-- Location -->
             <p>
               <strong>Location:</strong>
               {{ application.location }}
             </p>
 
+            <!-- Status -->
             <p>
               <strong>Status:</strong>
               {{ application.status }}
             </p>
 
+            <!-- Applied Date -->
             <p>
               <strong>Applied:</strong>
               {{ application.appliedDate }}
             </p>
 
-
+            <!-- Job URL -->
             @if (application.jobUrl) {
-
               <p>
-                <a
-                  [href]="application.jobUrl"
-                  target="_blank"
-                  rel="noopener noreferrer">
+                <a [href]="application.jobUrl" target="_blank" rel="noopener noreferrer">
                   View Job
                 </a>
               </p>
-
             }
 
-
+            <!-- Notes -->
             @if (application.notes) {
-
               <p>
                 <strong>Notes:</strong>
                 {{ application.notes }}
               </p>
-
             }
 
+            <!-- Edit Button -->
+            <div class="application-actions">
+              <button type="button" (click)="editApplication(application)">Edit</button>
+            </div>
           </div>
-
         }
-
       </div>
-
     }
-
   }
-
 </main>
