@@ -6,7 +6,8 @@
   margin-bottom: 24px;
 }
 
-.resume-form-section {
+.resume-form-section,
+.experience-section {
   max-width: 750px;
   padding: 24px;
   margin-bottom: 32px;
@@ -35,21 +36,42 @@
 }
 
 .form-actions,
-.resume-actions {
+.resume-actions,
+.experience-actions {
   display: flex;
   gap: 10px;
   margin-top: 16px;
 }
 
-.resume-grid {
+.resume-grid,
+.experience-list {
   display: grid;
   gap: 16px;
 }
 
-.resume-card {
+.resume-card,
+.experience-card {
   padding: 20px;
   border: 1px solid #e5e7eb;
   border-radius: 12px;
+}
+
+.experience-section {
+  margin-top: 32px;
+}
+
+.experience-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  gap: 16px;
+}
+
+.checkbox-group {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin-bottom: 18px;
 }
 
 small,
@@ -69,4 +91,10 @@ small,
 
 .updated-date {
   color: #667085;
+}
+
+.empty-state {
+  padding: 20px;
+  border: 1px dashed #d0d5dd;
+  border-radius: 12px;
 }
