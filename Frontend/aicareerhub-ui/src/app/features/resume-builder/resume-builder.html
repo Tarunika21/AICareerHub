@@ -1,0 +1,382 @@
+<app-navbar></app-navbar>
+
+<main class="resume-builder">
+  <!-- ================================================== -->
+  <!-- HEADER -->
+  <!-- ================================================== -->
+
+  <div class="builder-header">
+    <div>
+      <a routerLink="/resumes" class="back-link"> ← Back to Resumes </a>
+
+      <h1>
+        {{ resumeId ? 'Edit Resume' : 'Create Resume' }}
+      </h1>
+
+      <p>Build and maintain your professional resume.</p>
+    </div>
+  </div>
+
+  <!-- ================================================== -->
+  <!-- MAIN LOADING -->
+  <!-- ================================================== -->
+
+  @if (isLoading) {
+    <p>Loading resume...</p>
+  }
+
+  <!-- ================================================== -->
+  <!-- MAIN ERROR -->
+  <!-- ================================================== -->
+
+  @if (errorMessage) {
+    <p class="error-message">
+      {{ errorMessage }}
+    </p>
+  }
+
+  @if (!isLoading) {
+    <!-- ================================================== -->
+    <!-- SECTION 1 - BASIC DETAILS -->
+    <!-- ================================================== -->
+
+    <section class="builder-section">
+      <div class="section-header">
+        <div>
+          <h2>1. Basic Details</h2>
+
+          <p>Add the main information for this resume.</p>
+        </div>
+      </div>
+
+      <form [formGroup]="resumeForm" (ngSubmit)="saveBasicDetails()">
+        <!-- RESUME TITLE -->
+
+        <div class="form-group">
+          <label for="title"> Resume Title </label>
+
+          <input
+            id="title"
+            type="text"
+            formControlName="title"
+            placeholder="e.g. Full Stack Software Engineer Resume"
+          />
+
+          @if (resumeForm.controls.title.touched && resumeForm.controls.title.invalid) {
+            <small> Resume title is required. </small>
+          }
+        </div>
+
+        <!-- SKILLS -->
+
+        <div class="form-group">
+          <label for="skills"> Skills </label>
+
+          <textarea
+            id="skills"
+            formControlName="skills"
+            placeholder="Angular, React, ASP.NET Core, PostgreSQL, AWS"
+          >
+          </textarea>
+
+          <span class="field-hint"> Separate skills using commas. </span>
+        </div>
+
+        <!-- PROFESSIONAL SUMMARY -->
+
+        <div class="form-group">
+          <label for="professionalSummary"> Professional Summary </label>
+
+          <textarea
+            id="professionalSummary"
+            formControlName="professionalSummary"
+            placeholder="Write a short professional summary"
+          >
+          </textarea>
+        </div>
+
+        <!-- SAVE BASIC DETAILS -->
+
+        <div class="form-actions">
+          <button type="submit" [disabled]="isSaving">
+            {{ isSaving ? 'Saving...' : resumeId ? 'Save Basic Details' : 'Continue' }}
+          </button>
+        </div>
+      </form>
+
+      @if (successMessage) {
+        <p class="success-message">
+          {{ successMessage }}
+        </p>
+      }
+    </section>
+
+    <!-- ================================================== -->
+    <!-- SECTION 2 - WORK EXPERIENCE -->
+    <!-- ================================================== -->
+
+    <section class="builder-section">
+      <div class="section-header">
+        <div>
+          <h2>2. Work Experience</h2>
+
+          <p>Add your professional work experience.</p>
+        </div>
+      </div>
+
+      <!-- Resume must exist before child records can be saved -->
+
+      @if (!resumeId) {
+        <div class="section-disabled">
+          <p>Complete Basic Details to continue.</p>
+        </div>
+      } @else {
+        <!-- ============================================== -->
+        <!-- EXPERIENCE LOADING -->
+        <!-- ============================================== -->
+
+        @if (isExperienceLoading) {
+          <p>Loading experience...</p>
+        } @else {
+          <!-- ============================================ -->
+          <!-- EXPERIENCE LIST -->
+          <!-- ============================================ -->
+
+          @if (experiences.length === 0) {
+            <div class="section-placeholder">
+              <p>No work experience added yet.</p>
+            </div>
+          } @else {
+            <div class="experience-list">
+              @for (experience of experiences; track experience.id) {
+                <div class="experience-card">
+                  <div class="experience-details">
+                    <h3>
+                      {{ experience.jobTitle }}
+                    </h3>
+
+                    <strong>
+                      {{ experience.company }}
+                    </strong>
+
+                    <p>
+                      {{ experience.startDate }}
+
+                      —
+
+                      @if (experience.isCurrent) {
+                        Present
+                      } @else {
+                        {{ experience.endDate }}
+                      }
+                    </p>
+
+                    @if (experience.description) {
+                      <p>
+                        {{ experience.description }}
+                      </p>
+                    }
+                  </div>
+
+                  <div class="experience-actions">
+                    <button type="button" (click)="editExperience(experience)">Edit</button>
+
+                    <button type="button" (click)="deleteExperience(experience)">Delete</button>
+                  </div>
+                </div>
+              }
+            </div>
+          }
+        }
+
+        <!-- ============================================== -->
+        <!-- EXPERIENCE FORM -->
+        <!-- ============================================== -->
+
+        <div id="experience-form" class="sub-form">
+          <h3>
+            {{ editingExperienceId ? 'Edit Experience' : 'Add Experience' }}
+          </h3>
+
+          <form [formGroup]="experienceForm" (ngSubmit)="saveExperience()">
+            <!-- COMPANY -->
+
+            <div class="form-group">
+              <label for="company"> Company </label>
+
+              <input
+                id="company"
+                type="text"
+                formControlName="company"
+                placeholder="e.g. London Stock Exchange Group"
+              />
+
+              @if (
+                experienceForm.controls.company.touched && experienceForm.controls.company.invalid
+              ) {
+                <small> Company is required. </small>
+              }
+            </div>
+
+            <!-- JOB TITLE -->
+
+            <div class="form-group">
+              <label for="jobTitle"> Job Title </label>
+
+              <input
+                id="jobTitle"
+                type="text"
+                formControlName="jobTitle"
+                placeholder="e.g. Software Engineer"
+              />
+
+              @if (
+                experienceForm.controls.jobTitle.touched && experienceForm.controls.jobTitle.invalid
+              ) {
+                <small> Job title is required. </small>
+              }
+            </div>
+
+            <!-- START DATE -->
+
+            <div class="form-group">
+              <label for="startDate"> Start Date </label>
+
+              <input id="startDate" type="date" formControlName="startDate" />
+
+              @if (
+                experienceForm.controls.startDate.touched &&
+                experienceForm.controls.startDate.invalid
+              ) {
+                <small> Start date is required. </small>
+              }
+            </div>
+
+            <!-- CURRENT JOB -->
+
+            <div class="checkbox-group">
+              <input id="isCurrent" type="checkbox" formControlName="isCurrent" />
+
+              <label for="isCurrent"> I currently work here </label>
+            </div>
+
+            <!-- END DATE -->
+
+            @if (!experienceForm.controls.isCurrent.value) {
+              <div class="form-group">
+                <label for="endDate"> End Date </label>
+
+                <input id="endDate" type="date" formControlName="endDate" />
+              </div>
+            }
+
+            <!-- DESCRIPTION -->
+
+            <div class="form-group">
+              <label for="description"> Description </label>
+
+              <textarea
+                id="description"
+                formControlName="description"
+                placeholder="Describe your responsibilities, achievements and impact"
+              >
+              </textarea>
+            </div>
+
+            <!-- EXPERIENCE FORM BUTTONS -->
+
+            <div class="form-actions">
+              <button type="submit" [disabled]="isExperienceSaving">
+                {{
+                  isExperienceSaving
+                    ? 'Saving...'
+                    : editingExperienceId
+                      ? 'Update Experience'
+                      : 'Add Experience'
+                }}
+              </button>
+
+              @if (editingExperienceId) {
+                <button type="button" (click)="cancelExperienceEdit()">Cancel</button>
+              }
+            </div>
+          </form>
+
+          <!-- EXPERIENCE ERROR -->
+
+          @if (experienceErrorMessage) {
+            <p class="error-message">
+              {{ experienceErrorMessage }}
+            </p>
+          }
+
+          <!-- EXPERIENCE SUCCESS -->
+
+          @if (experienceSuccessMessage) {
+            <p class="success-message">
+              {{ experienceSuccessMessage }}
+            </p>
+          }
+        </div>
+      }
+    </section>
+
+    <!-- ================================================== -->
+    <!-- SECTION 3 - EDUCATION -->
+    <!-- ================================================== -->
+
+    <section class="builder-section">
+      <div class="section-header">
+        <div>
+          <h2>3. Education</h2>
+
+          <p>Add your educational qualifications.</p>
+        </div>
+      </div>
+
+      @if (!resumeId) {
+        <div class="section-disabled">
+          <p>Complete Basic Details to continue.</p>
+        </div>
+      } @else {
+        <div class="section-placeholder">
+          <p>Education details will be added here.</p>
+        </div>
+      }
+    </section>
+
+    <!-- ================================================== -->
+    <!-- SECTION 4 - PROJECTS -->
+    <!-- ================================================== -->
+
+    <section class="builder-section">
+      <div class="section-header">
+        <div>
+          <h2>4. Projects</h2>
+
+          <p>Showcase projects relevant to your career.</p>
+        </div>
+      </div>
+
+      @if (!resumeId) {
+        <div class="section-disabled">
+          <p>Complete Basic Details to continue.</p>
+        </div>
+      } @else {
+        <div class="section-placeholder">
+          <p>Project details will be added here.</p>
+        </div>
+      }
+    </section>
+
+    <!-- ================================================== -->
+    <!-- BOTTOM ACTION -->
+    <!-- ================================================== -->
+
+    @if (resumeId) {
+      <div class="builder-footer">
+        <a routerLink="/resumes" class="back-link"> ← Back to My Resumes </a>
+      </div>
+    }
+  }
+</main>

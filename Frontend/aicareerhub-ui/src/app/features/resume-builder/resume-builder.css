@@ -1,0 +1,120 @@
+.resume-builder {
+  max-width: 950px;
+  margin: 0 auto;
+  padding: 24px;
+}
+
+.builder-header {
+  margin-bottom: 28px;
+}
+
+.back-link {
+  display: inline-block;
+  margin-bottom: 12px;
+}
+
+.builder-section {
+  padding: 24px;
+  margin-bottom: 24px;
+  border: 1px solid #e5e7eb;
+  border-radius: 12px;
+}
+
+.section-header {
+  margin-bottom: 20px;
+}
+
+.section-header h2 {
+  margin-bottom: 6px;
+}
+
+.form-group {
+  margin-bottom: 18px;
+}
+
+.form-group label {
+  display: block;
+  margin-bottom: 6px;
+}
+
+.form-group input,
+.form-group textarea {
+  width: 100%;
+  box-sizing: border-box;
+  padding: 10px;
+}
+
+.form-group textarea {
+  min-height: 100px;
+}
+
+.field-hint {
+  display: block;
+  margin-top: 4px;
+  color: #667085;
+}
+
+.section-disabled,
+.section-placeholder {
+  padding: 20px;
+  border: 1px dashed #d0d5dd;
+  border-radius: 8px;
+}
+
+.section-disabled {
+  color: #667085;
+}
+
+.error-message,
+small {
+  color: #b42318;
+}
+
+.success-message {
+  color: #067647;
+}
+
+.sub-form {
+  margin-top: 24px;
+  padding-top: 24px;
+  border-top: 1px solid #e5e7eb;
+}
+
+.experience-list {
+  display: grid;
+  gap: 16px;
+  margin-bottom: 24px;
+}
+
+.experience-card {
+  display: flex;
+  justify-content: space-between;
+  gap: 20px;
+  padding: 18px;
+  border: 1px solid #e5e7eb;
+  border-radius: 10px;
+}
+
+.experience-card h3 {
+  margin-top: 0;
+  margin-bottom: 6px;
+}
+
+.experience-actions {
+  display: flex;
+  gap: 8px;
+  align-items: flex-start;
+}
+
+.form-actions {
+  display: flex;
+  gap: 10px;
+  margin-top: 16px;
+}
+
+.checkbox-group {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin-bottom: 18px;
+}

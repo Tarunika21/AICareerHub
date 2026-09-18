@@ -6,6 +6,8 @@ import { JobTracker } from './features/job-tracker/job-tracker';
 import { authGuard } from './core/guards/auth.guard';
 import { CareerProfile } from './features/career-profile/career-profile';
 import { Resumes } from './features/resumes/resumes';
+import { ResumeBuilder } from './features/resume-builder/resume-builder';
+
 export const routes: Routes = [
   { path: '', redirectTo: 'login', pathMatch: 'full' },
 
@@ -25,6 +27,16 @@ export const routes: Routes = [
   {
     path: 'career-profile',
     component: CareerProfile,
+    canActivate: [authGuard],
+  },
+  {
+    path: 'resumes/new',
+    component: ResumeBuilder,
+    canActivate: [authGuard],
+  },
+  {
+    path: 'resumes/:id/edit',
+    component: ResumeBuilder,
     canActivate: [authGuard],
   },
   {

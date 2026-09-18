@@ -1,3 +1,4 @@
+<a routerLink="/resumes/new"> Create New Resume </a>
 <app-navbar></app-navbar>
 
 <main class="resumes-page">
@@ -161,9 +162,7 @@
               <!-- Resume Actions -->
 
               <div class="resume-actions">
-                <button type="button" (click)="editResume(resume)">Edit</button>
-
-                <button type="button" (click)="manageExperience(resume)">Manage Experience</button>
+                <a [routerLink]="['/resumes', resume.id, 'edit']"> Open / Edit Resume </a>
 
                 <button type="button" (click)="deleteResume(resume)">Delete</button>
               </div>

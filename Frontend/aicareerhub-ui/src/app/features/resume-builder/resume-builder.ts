@@ -1,39 +1,37 @@
 import { CommonModule } from '@angular/common';
 import { Component, OnInit } from '@angular/core';
 import { FormBuilder, ReactiveFormsModule, Validators } from '@angular/forms';
+import { ActivatedRoute, Router, RouterLink } from '@angular/router';
 import { Navbar } from '../../layout/navbar/navbar';
 import { Resume, ResumeRequest } from '../../core/models/resume';
 import { ResumeExperience, ResumeExperienceRequest } from '../../core/models/resume-experience';
 import { ResumeService } from '../../core/services/resume.service';
 import { ResumeExperienceService } from '../../core/services/resume-experience.service';
-import { RouterLink } from '@angular/router';
 
 @Component({
-  selector: 'app-resumes',
-  imports: [CommonModule, ReactiveFormsModule, Navbar, RouterLink],
-  templateUrl: './resumes.html',
-  styleUrl: './resumes.css',
+  selector: 'app-resume-builder',
+  imports: [CommonModule, ReactiveFormsModule, RouterLink, Navbar],
+  templateUrl: './resume-builder.html',
+  styleUrl: './resume-builder.css',
 })
-export class Resumes implements OnInit {
-  // ------------------------------------------------
-  // RESUME STATE
-  // ------------------------------------------------
+export class ResumeBuilder implements OnInit {
+  // ==============================
+  // RESUME
+  // ==============================
 
-  resumes: Resume[] = [];
+  resumeId: string | null = null;
 
-  isLoading = true;
+  resume: Resume | null = null;
+
+  isLoading = false;
   isSaving = false;
 
   errorMessage = '';
   successMessage = '';
 
-  editingResumeId: string | null = null;
-
-  // ------------------------------------------------
-  // EXPERIENCE STATE
-  // ------------------------------------------------
-
-  selectedResume: Resume | null = null;
+  // ==============================
+  // EXPERIENCE
+  // ==============================
 
   experiences: ResumeExperience[] = [];
 
@@ -45,34 +43,30 @@ export class Resumes implements OnInit {
 
   editingExperienceId: string | null = null;
 
-  // ------------------------------------------------
-  // FORMS
-  // ------------------------------------------------
+  // ==============================
+  // RESUME FORM
+  // ==============================
 
   resumeForm;
+
+  // ==============================
+  // EXPERIENCE FORM
+  // ==============================
 
   experienceForm;
 
   constructor(
     private fb: FormBuilder,
+    private route: ActivatedRoute,
+    private router: Router,
     private resumeService: ResumeService,
     private resumeExperienceService: ResumeExperienceService,
   ) {
-    // ----------------------------------------------
-    // Resume Form
-    // ----------------------------------------------
-
     this.resumeForm = this.fb.nonNullable.group({
       title: ['', [Validators.required, Validators.maxLength(150)]],
-
-      professionalSummary: ['', [Validators.maxLength(2000)]],
-
       skills: ['', [Validators.maxLength(1000)]],
+      professionalSummary: ['', [Validators.maxLength(2000)]],
     });
-
-    // ----------------------------------------------
-    // Experience Form
-    // ----------------------------------------------
 
     this.experienceForm = this.fb.nonNullable.group({
       company: ['', [Validators.required, Validators.maxLength(150)]],
@@ -84,35 +78,57 @@ export class Resumes implements OnInit {
     });
   }
 
+  // ==============================
+  // INITIALIZATION
+  // ==============================
+
   ngOnInit(): void {
-    this.loadResumes();
+    const id = this.route.snapshot.paramMap.get('id');
+
+    if (id) {
+      this.resumeId = id;
+      this.loadResume();
+      this.loadExperiences();
+    }
   }
 
-  // =================================================
+  // ==============================
   // RESUME
-  // =================================================
+  // ==============================
 
-  loadResumes(): void {
+  loadResume(): void {
+    if (!this.resumeId) {
+      return;
+    }
+
     this.isLoading = true;
     this.errorMessage = '';
 
-    this.resumeService.getAll().subscribe({
-      next: (resumes) => {
-        this.resumes = resumes;
+    this.resumeService.getById(this.resumeId).subscribe({
+      next: (resume) => {
+        this.resume = resume;
+
+        this.resumeForm.patchValue({
+          title: resume.title,
+          skills: resume.skills,
+          professionalSummary: resume.professionalSummary ?? '',
+        });
+
         this.isLoading = false;
       },
 
       error: (error) => {
-        console.error('Failed to load resumes:', error);
-        this.errorMessage = 'Unable to load resumes.';
+        console.error('Failed to load resume:', error);
+        this.errorMessage = 'Unable to load resume.';
         this.isLoading = false;
       },
     });
   }
 
-  saveResume(): void {
+  saveBasicDetails(): void {
     if (this.resumeForm.invalid) {
       this.resumeForm.markAllAsTouched();
+
       return;
     }
 
@@ -125,249 +141,139 @@ export class Resumes implements OnInit {
 
     const request: ResumeRequest = {
       title: formValue.title.trim(),
-
       skills: formValue.skills.trim(),
-
       professionalSummary: formValue.professionalSummary.trim() || null,
     };
 
-    if (this.editingResumeId) {
-      this.resumeService.update(this.editingResumeId, request).subscribe({
-        next: () => {
+    // ============================
+    // UPDATE EXISTING RESUME
+    // ============================
+
+    if (this.resumeId) {
+      this.resumeService.update(this.resumeId, request).subscribe({
+        next: (resume) => {
+          this.resume = resume;
           this.isSaving = false;
-
-          this.successMessage = 'Resume updated successfully.';
-
-          this.editingResumeId = null;
-
-          this.resetResumeForm();
-
-          this.loadResumes();
+          this.successMessage = 'Resume details saved successfully.';
         },
 
         error: (error) => {
           console.error('Failed to update resume:', error);
-
           this.isSaving = false;
-
-          this.errorMessage = 'Unable to update resume.';
+          this.errorMessage = 'Unable to save resume.';
         },
       });
 
       return;
     }
 
+    // ============================
+    // CREATE NEW RESUME
+    // ============================
+
     this.resumeService.create(request).subscribe({
-      next: () => {
+      next: (resume) => {
+        this.resume = resume;
+        this.resumeId = resume.id;
         this.isSaving = false;
-
-        this.successMessage = 'Resume created successfully.';
-
-        this.resetResumeForm();
-
-        this.loadResumes();
+        this.successMessage = 'Basic details saved. Continue building your resume.';
+        this.router.navigate(['/resumes', resume.id, 'edit'], {
+          replaceUrl: true,
+        });
       },
 
       error: (error) => {
         console.error('Failed to create resume:', error);
-
         this.isSaving = false;
-
         this.errorMessage = 'Unable to create resume.';
       },
     });
   }
 
-  editResume(resume: Resume): void {
-    this.editingResumeId = resume.id;
-
-    this.errorMessage = '';
-    this.successMessage = '';
-
-    this.resumeForm.setValue({
-      title: resume.title,
-
-      professionalSummary: resume.professionalSummary ?? '',
-
-      skills: resume.skills,
-    });
-
-    window.scrollTo({
-      top: 0,
-      behavior: 'smooth',
-    });
-  }
-
-  cancelEdit(): void {
-    this.editingResumeId = null;
-
-    this.resetResumeForm();
-
-    this.errorMessage = '';
-    this.successMessage = '';
-  }
-
-  deleteResume(resume: Resume): void {
-    const confirmed = window.confirm(`Are you sure you want to delete "${resume.title}"?`);
-
-    if (!confirmed) {
-      return;
-    }
-
-    this.errorMessage = '';
-    this.successMessage = '';
-
-    this.resumeService.delete(resume.id).subscribe({
-      next: () => {
-        this.successMessage = 'Resume deleted successfully.';
-
-        if (this.editingResumeId === resume.id) {
-          this.editingResumeId = null;
-
-          this.resetResumeForm();
-        }
-
-        if (this.selectedResume?.id === resume.id) {
-          this.closeExperienceManager();
-        }
-
-        this.loadResumes();
-      },
-
-      error: (error) => {
-        console.error('Failed to delete resume:', error);
-
-        this.errorMessage = 'Unable to delete resume.';
-      },
-    });
-  }
-
-  resetResumeForm(): void {
-    this.resumeForm.reset({
-      title: '',
-
-      professionalSummary: '',
-
-      skills: '',
-    });
-  }
-
-  // =================================================
+  // ==============================
   // EXPERIENCE
-  // =================================================
-
-  manageExperience(resume: Resume): void {
-    this.selectedResume = resume;
-
-    this.editingExperienceId = null;
-
-    this.resetExperienceForm();
-
-    this.experienceErrorMessage = '';
-    this.experienceSuccessMessage = '';
-
-    this.loadExperiences();
-  }
+  // ==============================
 
   loadExperiences(): void {
-    if (!this.selectedResume) {
+    if (!this.resumeId) {
       return;
     }
 
     this.isExperienceLoading = true;
-
     this.experienceErrorMessage = '';
 
-    this.resumeExperienceService.getAll(this.selectedResume.id).subscribe({
+    this.resumeExperienceService.getAll(this.resumeId).subscribe({
       next: (experiences) => {
         this.experiences = experiences;
-
         this.isExperienceLoading = false;
       },
 
       error: (error) => {
         console.error('Failed to load experiences:', error);
-
-        this.experienceErrorMessage = 'Unable to load experiences.';
-
+        this.experienceErrorMessage = 'Unable to load work experience.';
         this.isExperienceLoading = false;
       },
     });
   }
 
   saveExperience(): void {
-    if (!this.selectedResume) {
+    if (!this.resumeId) {
+      this.experienceErrorMessage = 'Save Basic Details first.';
+
       return;
     }
 
     if (this.experienceForm.invalid) {
       this.experienceForm.markAllAsTouched();
+
       return;
     }
 
     this.isExperienceSaving = true;
-
     this.experienceErrorMessage = '';
     this.experienceSuccessMessage = '';
 
     const formValue = this.experienceForm.getRawValue();
-
-    /*
-     * A current job should not have an end date.
-     */
     const endDate = formValue.isCurrent ? null : formValue.endDate || null;
 
-    /*
-     * Validate the date relationship on the frontend
-     * before sending it to the backend.
-     */
+    // ============================
+    // DATE VALIDATION
+    // ============================
+
     if (endDate && endDate < formValue.startDate) {
       this.isExperienceSaving = false;
-
       this.experienceErrorMessage = 'End date cannot be earlier than start date.';
-
       return;
     }
 
     const request: ResumeExperienceRequest = {
       company: formValue.company.trim(),
-
       jobTitle: formValue.jobTitle.trim(),
-
       startDate: formValue.startDate,
-
       endDate,
-
       isCurrent: formValue.isCurrent,
-
       description: formValue.description.trim() || null,
     };
 
-    // ----------------------------------------------
+    // ============================
     // UPDATE EXPERIENCE
-    // ----------------------------------------------
+    // ============================
 
     if (this.editingExperienceId) {
       this.resumeExperienceService
-        .update(this.selectedResume.id, this.editingExperienceId, request)
+        .update(this.resumeId, this.editingExperienceId, request)
         .subscribe({
           next: () => {
             this.isExperienceSaving = false;
-
             this.experienceSuccessMessage = 'Experience updated successfully.';
-
             this.editingExperienceId = null;
-
             this.resetExperienceForm();
-
             this.loadExperiences();
           },
 
           error: (error) => {
             console.error('Failed to update experience:', error);
-
             this.isExperienceSaving = false;
-
             this.experienceErrorMessage = 'Unable to update experience.';
           },
         });
@@ -375,26 +281,21 @@ export class Resumes implements OnInit {
       return;
     }
 
-    // ----------------------------------------------
+    // ============================
     // CREATE EXPERIENCE
-    // ----------------------------------------------
+    // ============================
 
-    this.resumeExperienceService.create(this.selectedResume.id, request).subscribe({
+    this.resumeExperienceService.create(this.resumeId, request).subscribe({
       next: () => {
         this.isExperienceSaving = false;
-
         this.experienceSuccessMessage = 'Experience added successfully.';
-
         this.resetExperienceForm();
-
         this.loadExperiences();
       },
 
       error: (error) => {
         console.error('Failed to create experience:', error);
-
         this.isExperienceSaving = false;
-
         this.experienceErrorMessage = 'Unable to add experience.';
       },
     });
@@ -402,42 +303,37 @@ export class Resumes implements OnInit {
 
   editExperience(experience: ResumeExperience): void {
     this.editingExperienceId = experience.id;
-
     this.experienceErrorMessage = '';
     this.experienceSuccessMessage = '';
-
-    this.experienceForm.setValue({
+    this.experienceForm.patchValue({
       company: experience.company,
-
       jobTitle: experience.jobTitle,
-
       startDate: experience.startDate,
-
       endDate: experience.endDate ?? '',
-
       isCurrent: experience.isCurrent,
-
       description: experience.description ?? '',
     });
+
+    setTimeout(() => {
+      document.getElementById('experience-form')?.scrollIntoView({
+        behavior: 'smooth',
+      });
+    }, 0);
   }
 
   cancelExperienceEdit(): void {
     this.editingExperienceId = null;
-
     this.resetExperienceForm();
-
     this.experienceErrorMessage = '';
     this.experienceSuccessMessage = '';
   }
 
   deleteExperience(experience: ResumeExperience): void {
-    if (!this.selectedResume) {
+    if (!this.resumeId) {
       return;
     }
 
-    const confirmed = window.confirm(
-      `Are you sure you want to delete your experience at ${experience.company}?`,
-    );
+    const confirmed = confirm(`Delete your experience at ${experience.company}?`);
 
     if (!confirmed) {
       return;
@@ -445,23 +341,19 @@ export class Resumes implements OnInit {
 
     this.experienceErrorMessage = '';
     this.experienceSuccessMessage = '';
-
-    this.resumeExperienceService.delete(this.selectedResume.id, experience.id).subscribe({
+    this.resumeExperienceService.delete(this.resumeId, experience.id).subscribe({
       next: () => {
         this.experienceSuccessMessage = 'Experience deleted successfully.';
 
         if (this.editingExperienceId === experience.id) {
           this.editingExperienceId = null;
-
           this.resetExperienceForm();
         }
-
         this.loadExperiences();
       },
 
       error: (error) => {
         console.error('Failed to delete experience:', error);
-
         this.experienceErrorMessage = 'Unable to delete experience.';
       },
     });
@@ -470,29 +362,11 @@ export class Resumes implements OnInit {
   resetExperienceForm(): void {
     this.experienceForm.reset({
       company: '',
-
       jobTitle: '',
-
       startDate: '',
-
       endDate: '',
-
       isCurrent: false,
-
       description: '',
     });
-  }
-
-  closeExperienceManager(): void {
-    this.selectedResume = null;
-
-    this.experiences = [];
-
-    this.editingExperienceId = null;
-
-    this.experienceErrorMessage = '';
-    this.experienceSuccessMessage = '';
-
-    this.resetExperienceForm();
   }
 }
