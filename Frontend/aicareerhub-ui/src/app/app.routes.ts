@@ -5,6 +5,7 @@ import { Dashboard } from './features/dashboard/dashboard';
 import { JobTracker } from './features/job-tracker/job-tracker';
 import { authGuard } from './core/guards/auth.guard';
 import { CareerProfile } from './features/career-profile/career-profile';
+import { Resumes } from './features/resumes/resumes';
 export const routes: Routes = [
   { path: '', redirectTo: 'login', pathMatch: 'full' },
 
@@ -14,18 +15,22 @@ export const routes: Routes = [
   {
     path: 'dashboard',
     component: Dashboard,
-    canActivate: [authGuard]
+    canActivate: [authGuard],
   },
   {
     path: 'job-tracker',
     component: JobTracker,
-    canActivate: [authGuard]
+    canActivate: [authGuard],
   },
   {
     path: 'career-profile',
     component: CareerProfile,
-    canActivate: [authGuard]
+    canActivate: [authGuard],
   },
-
-  { path: '**', redirectTo: 'login' }
+  {
+    path: 'resumes',
+    component: Resumes,
+    canActivate: [authGuard],
+  },
+  { path: '**', redirectTo: 'login' },
 ];

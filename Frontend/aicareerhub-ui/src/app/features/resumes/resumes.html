@@ -1,1 +1,162 @@
-<p>resumes works!</p>
+<app-navbar></app-navbar>
+
+<main class="resumes-page">
+  <!-- ====================================== -->
+  <!-- PAGE HEADER -->
+  <!-- ====================================== -->
+
+  <div class="page-header">
+    <h1>Resumes</h1>
+
+    <p>Create and manage resumes for your job applications.</p>
+  </div>
+
+  <!-- ====================================== -->
+  <!-- CREATE / EDIT RESUME -->
+  <!-- ====================================== -->
+
+  <section class="resume-form-section">
+    <h2>
+      {{ editingResumeId ? 'Edit Resume' : 'Create Resume' }}
+    </h2>
+
+    <form [formGroup]="resumeForm" (ngSubmit)="saveResume()">
+      <!-- Title -->
+
+      <div class="form-group">
+        <label for="title"> Resume Title </label>
+
+        <input
+          id="title"
+          type="text"
+          formControlName="title"
+          placeholder="e.g. Full Stack Developer Resume"
+        />
+
+        @if (resumeForm.controls.title.touched && resumeForm.controls.title.invalid) {
+          <small> Resume title is required. </small>
+        }
+      </div>
+
+      <!-- Skills -->
+
+      <div class="form-group">
+        <label for="skills"> Skills </label>
+
+        <textarea
+          id="skills"
+          formControlName="skills"
+          placeholder="Angular, React, ASP.NET Core, PostgreSQL, AWS"
+        >
+        </textarea>
+
+        <small class="field-hint"> Separate skills using commas. </small>
+      </div>
+
+      <!-- Professional Summary -->
+
+      <div class="form-group">
+        <label for="professionalSummary"> Professional Summary </label>
+
+        <textarea
+          id="professionalSummary"
+          formControlName="professionalSummary"
+          placeholder="Write a short professional summary"
+        >
+        </textarea>
+      </div>
+
+      <!-- Form Actions -->
+
+      <div class="form-actions">
+        <button type="submit" [disabled]="isSaving">
+          {{ isSaving ? 'Saving...' : editingResumeId ? 'Update Resume' : 'Create Resume' }}
+        </button>
+
+        @if (editingResumeId) {
+          <button type="button" (click)="cancelEdit()" [disabled]="isSaving">Cancel</button>
+        }
+      </div>
+    </form>
+
+    @if (successMessage) {
+      <p class="success-message">
+        {{ successMessage }}
+      </p>
+    }
+  </section>
+
+  <!-- ====================================== -->
+  <!-- ERROR -->
+  <!-- ====================================== -->
+
+  @if (errorMessage) {
+    <p class="error-message">
+      {{ errorMessage }}
+    </p>
+  }
+
+  <!-- ====================================== -->
+  <!-- LOADING -->
+  <!-- ====================================== -->
+
+  @if (isLoading) {
+    <p>Loading resumes...</p>
+  }
+
+  <!-- ====================================== -->
+  <!-- RESUME LIST -->
+  <!-- ====================================== -->
+
+  @if (!isLoading && !errorMessage) {
+    @if (resumes.length === 0) {
+      <div class="empty-state">
+        <h2>No resumes yet</h2>
+
+        <p>Create your first resume to start building your professional profile.</p>
+      </div>
+    } @else {
+      <section class="resume-list">
+        <h2>Your Resumes</h2>
+
+        <div class="resume-grid">
+          @for (resume of resumes; track resume.id) {
+            <article class="resume-card">
+              <h3>
+                {{ resume.title }}
+              </h3>
+
+              @if (resume.skills) {
+                <p>
+                  <strong> Skills: </strong>
+
+                  {{ resume.skills }}
+                </p>
+              }
+
+              @if (resume.professionalSummary) {
+                <p>
+                  <strong> Summary: </strong>
+
+                  {{ resume.professionalSummary }}
+                </p>
+              }
+
+              <p class="updated-date">
+                <strong> Last Updated: </strong>
+
+                {{ resume.updatedAt | date: 'medium' }}
+              </p>
+
+              <div class="resume-actions">
+                <button type="button" (click)="editResume(resume)">Edit</button>
+
+                <button type="button" (click)="deleteResume(resume)">Delete</button>
+              </div>
+            </article>
+          }
+        </div>
+      </section>
+    }
+  }
+</main>

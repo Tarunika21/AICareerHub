@@ -1,0 +1,72 @@
+.resumes-page {
+  padding: 24px;
+}
+
+.page-header {
+  margin-bottom: 24px;
+}
+
+.resume-form-section {
+  max-width: 750px;
+  padding: 24px;
+  margin-bottom: 32px;
+  border: 1px solid #e5e7eb;
+  border-radius: 12px;
+}
+
+.form-group {
+  margin-bottom: 18px;
+}
+
+.form-group label {
+  display: block;
+  margin-bottom: 6px;
+}
+
+.form-group input,
+.form-group textarea {
+  width: 100%;
+  box-sizing: border-box;
+  padding: 10px;
+}
+
+.form-group textarea {
+  min-height: 100px;
+}
+
+.form-actions,
+.resume-actions {
+  display: flex;
+  gap: 10px;
+  margin-top: 16px;
+}
+
+.resume-grid {
+  display: grid;
+  gap: 16px;
+}
+
+.resume-card {
+  padding: 20px;
+  border: 1px solid #e5e7eb;
+  border-radius: 12px;
+}
+
+small,
+.error-message {
+  color: #b42318;
+}
+
+.field-hint {
+  display: block;
+  margin-top: 4px;
+  color: #667085;
+}
+
+.success-message {
+  color: #067647;
+}
+
+.updated-date {
+  color: #667085;
+}
