@@ -339,8 +339,183 @@
           <p>Complete Basic Details to continue.</p>
         </div>
       } @else {
-        <div class="section-placeholder">
-          <p>Education details will be added here.</p>
+        <!-- EDUCATION LOADING -->
+
+        @if (isEducationLoading) {
+          <p>Loading education...</p>
+        } @else {
+          <!-- EDUCATION LIST -->
+
+          @if (educations.length === 0) {
+            <div class="section-placeholder">
+              <p>No education added yet.</p>
+            </div>
+          } @else {
+            <div class="education-list">
+              @for (education of educations; track education.id) {
+                <div class="education-card">
+                  <div class="education-details">
+                    <h3>
+                      {{ education.degree }}
+                    </h3>
+
+                    <strong>
+                      {{ education.institution }}
+                    </strong>
+
+                    @if (education.fieldOfStudy) {
+                      <p>
+                        {{ education.fieldOfStudy }}
+                      </p>
+                    }
+
+                    <p>
+                      {{ education.startYear }}
+
+                      —
+
+                      {{ education.endYear ?? 'Present' }}
+                    </p>
+                  </div>
+
+                  <div class="education-actions">
+                    <button type="button" (click)="editEducation(education)">Edit</button>
+
+                    <button type="button" (click)="deleteEducation(education)">Delete</button>
+                  </div>
+                </div>
+              }
+            </div>
+          }
+        }
+
+        <!-- ============================================== -->
+        <!-- EDUCATION FORM -->
+        <!-- ============================================== -->
+
+        <div id="education-form" class="sub-form">
+          <h3>
+            {{ editingEducationId ? 'Edit Education' : 'Add Education' }}
+          </h3>
+
+          <form [formGroup]="educationForm" (ngSubmit)="saveEducation()">
+            <!-- INSTITUTION -->
+
+            <div class="form-group">
+              <label for="institution"> Institution </label>
+
+              <input
+                id="institution"
+                type="text"
+                formControlName="institution"
+                placeholder="e.g. Anna University"
+              />
+
+              @if (
+                educationForm.controls.institution.touched &&
+                educationForm.controls.institution.invalid
+              ) {
+                <small> Institution is required. </small>
+              }
+            </div>
+
+            <!-- DEGREE -->
+
+            <div class="form-group">
+              <label for="degree"> Degree </label>
+
+              <input
+                id="degree"
+                type="text"
+                formControlName="degree"
+                placeholder="e.g. Bachelor of Engineering"
+              />
+
+              @if (educationForm.controls.degree.touched && educationForm.controls.degree.invalid) {
+                <small> Degree is required. </small>
+              }
+            </div>
+
+            <!-- FIELD OF STUDY -->
+
+            <div class="form-group">
+              <label for="fieldOfStudy"> Field of Study </label>
+
+              <input
+                id="fieldOfStudy"
+                type="text"
+                formControlName="fieldOfStudy"
+                placeholder="e.g. Computer Science"
+              />
+            </div>
+
+            <!-- START YEAR -->
+
+            <div class="form-group">
+              <label for="startYear"> Start Year </label>
+
+              <input
+                id="startYear"
+                type="number"
+                min="1950"
+                max="2100"
+                formControlName="startYear"
+              />
+
+              @if (
+                educationForm.controls.startYear.touched && educationForm.controls.startYear.invalid
+              ) {
+                <small> Enter a year between 1950 and 2100. </small>
+              }
+            </div>
+
+            <!-- END YEAR -->
+
+            <div class="form-group">
+              <label for="endYear"> End Year </label>
+
+              <input
+                id="endYear"
+                type="number"
+                min="1950"
+                max="2100"
+                formControlName="endYear"
+                placeholder="Leave blank if currently studying"
+              />
+
+              <span class="field-hint"> Leave blank if you are currently studying. </span>
+            </div>
+
+            <!-- BUTTONS -->
+
+            <div class="form-actions">
+              <button type="submit" [disabled]="isEducationSaving">
+                {{
+                  isEducationSaving
+                    ? 'Saving...'
+                    : editingEducationId
+                      ? 'Update Education'
+                      : 'Add Education'
+                }}
+              </button>
+
+              @if (editingEducationId) {
+                <button type="button" (click)="cancelEducationEdit()">Cancel</button>
+              }
+            </div>
+          </form>
+
+          @if (educationErrorMessage) {
+            <p class="error-message">
+              {{ educationErrorMessage }}
+            </p>
+          }
+
+          @if (educationSuccessMessage) {
+            <p class="success-message">
+              {{ educationSuccessMessage }}
+            </p>
+          }
         </div>
       }
     </section>

@@ -7,6 +7,8 @@ import { Resume, ResumeRequest } from '../../core/models/resume';
 import { ResumeExperience, ResumeExperienceRequest } from '../../core/models/resume-experience';
 import { ResumeService } from '../../core/services/resume.service';
 import { ResumeExperienceService } from '../../core/services/resume-experience.service';
+import { ResumeEducation, ResumeEducationRequest } from '../../core/models/resume-education';
+import { ResumeEducationService } from '../../core/services/resume-education.service';
 
 @Component({
   selector: 'app-resume-builder',
@@ -42,7 +44,19 @@ export class ResumeBuilder implements OnInit {
   experienceSuccessMessage = '';
 
   editingExperienceId: string | null = null;
+  // ==============================
+  // EDUCATION
+  // ==============================
 
+  educations: ResumeEducation[] = [];
+
+  isEducationLoading = false;
+  isEducationSaving = false;
+
+  educationErrorMessage = '';
+  educationSuccessMessage = '';
+
+  editingEducationId: string | null = null;
   // ==============================
   // RESUME FORM
   // ==============================
@@ -54,6 +68,7 @@ export class ResumeBuilder implements OnInit {
   // ==============================
 
   experienceForm;
+  educationForm;
 
   constructor(
     private fb: FormBuilder,
@@ -61,6 +76,7 @@ export class ResumeBuilder implements OnInit {
     private router: Router,
     private resumeService: ResumeService,
     private resumeExperienceService: ResumeExperienceService,
+    private resumeEducationService: ResumeEducationService,
   ) {
     this.resumeForm = this.fb.nonNullable.group({
       title: ['', [Validators.required, Validators.maxLength(150)]],
@@ -76,6 +92,20 @@ export class ResumeBuilder implements OnInit {
       isCurrent: [false],
       description: ['', [Validators.maxLength(2000)]],
     });
+    this.educationForm = this.fb.nonNullable.group({
+      institution: ['', [Validators.required, Validators.maxLength(200)]],
+
+      degree: ['', [Validators.required, Validators.maxLength(150)]],
+
+      fieldOfStudy: ['', [Validators.maxLength(150)]],
+
+      startYear: [
+        new Date().getFullYear(),
+        [Validators.required, Validators.min(1950), Validators.max(2100)],
+      ],
+
+      endYear: [null as number | null, [Validators.min(1950), Validators.max(2100)]],
+    });
   }
 
   // ==============================
@@ -89,6 +119,7 @@ export class ResumeBuilder implements OnInit {
       this.resumeId = id;
       this.loadResume();
       this.loadExperiences();
+      this.loadEducations();
     }
   }
 
@@ -367,6 +398,212 @@ export class ResumeBuilder implements OnInit {
       endDate: '',
       isCurrent: false,
       description: '',
+    });
+  }
+
+  loadEducations(): void {
+    if (!this.resumeId) {
+      return;
+    }
+
+    this.isEducationLoading = true;
+    this.educationErrorMessage = '';
+
+    this.resumeEducationService.getAll(this.resumeId).subscribe({
+      next: (educations) => {
+        this.educations = educations;
+
+        this.isEducationLoading = false;
+      },
+
+      error: (error) => {
+        console.error('Failed to load education:', error);
+
+        this.educationErrorMessage = 'Unable to load education.';
+
+        this.isEducationLoading = false;
+      },
+    });
+  }
+
+  saveEducation(): void {
+    if (!this.resumeId) {
+      this.educationErrorMessage = 'Save Basic Details first.';
+
+      return;
+    }
+
+    if (this.educationForm.invalid) {
+      this.educationForm.markAllAsTouched();
+
+      return;
+    }
+
+    this.isEducationSaving = true;
+
+    this.educationErrorMessage = '';
+    this.educationSuccessMessage = '';
+
+    const formValue = this.educationForm.getRawValue();
+
+    const startYear = Number(formValue.startYear);
+
+    const endYear =
+      formValue.endYear === null || formValue.endYear === undefined
+        ? null
+        : Number(formValue.endYear);
+
+    // End year cannot precede start year.
+
+    if (endYear !== null && endYear < startYear) {
+      this.isEducationSaving = false;
+
+      this.educationErrorMessage = 'End year cannot be earlier than start year.';
+
+      return;
+    }
+
+    const request: ResumeEducationRequest = {
+      institution: formValue.institution.trim(),
+
+      degree: formValue.degree.trim(),
+
+      fieldOfStudy: formValue.fieldOfStudy.trim() || null,
+
+      startYear,
+
+      endYear,
+    };
+
+    // UPDATE
+
+    if (this.editingEducationId) {
+      this.resumeEducationService
+        .update(this.resumeId, this.editingEducationId, request)
+        .subscribe({
+          next: () => {
+            this.isEducationSaving = false;
+
+            this.educationSuccessMessage = 'Education updated successfully.';
+
+            this.editingEducationId = null;
+
+            this.resetEducationForm();
+
+            this.loadEducations();
+          },
+
+          error: (error) => {
+            console.error('Failed to update education:', error);
+
+            this.isEducationSaving = false;
+
+            this.educationErrorMessage = 'Unable to update education.';
+          },
+        });
+
+      return;
+    }
+
+    // CREATE
+
+    this.resumeEducationService.create(this.resumeId, request).subscribe({
+      next: () => {
+        this.isEducationSaving = false;
+
+        this.educationSuccessMessage = 'Education added successfully.';
+
+        this.resetEducationForm();
+
+        this.loadEducations();
+      },
+
+      error: (error) => {
+        console.error('Failed to create education:', error);
+
+        this.isEducationSaving = false;
+
+        this.educationErrorMessage = 'Unable to add education.';
+      },
+    });
+  }
+
+  editEducation(education: ResumeEducation): void {
+    this.editingEducationId = education.id;
+
+    this.educationErrorMessage = '';
+    this.educationSuccessMessage = '';
+
+    this.educationForm.patchValue({
+      institution: education.institution,
+
+      degree: education.degree,
+
+      fieldOfStudy: education.fieldOfStudy ?? '',
+
+      startYear: education.startYear,
+
+      endYear: education.endYear ?? null,
+    });
+
+    setTimeout(() => {
+      document.getElementById('education-form')?.scrollIntoView({
+        behavior: 'smooth',
+      });
+    }, 0);
+  }
+
+  cancelEducationEdit(): void {
+    this.editingEducationId = null;
+
+    this.resetEducationForm();
+
+    this.educationErrorMessage = '';
+    this.educationSuccessMessage = '';
+  }
+
+  deleteEducation(education: ResumeEducation): void {
+    if (!this.resumeId) {
+      return;
+    }
+
+    const confirmed = confirm(`Delete ${education.degree} from ${education.institution}?`);
+
+    if (!confirmed) {
+      return;
+    }
+
+    this.educationErrorMessage = '';
+    this.educationSuccessMessage = '';
+
+    this.resumeEducationService.delete(this.resumeId, education.id).subscribe({
+      next: () => {
+        this.educationSuccessMessage = 'Education deleted successfully.';
+
+        if (this.editingEducationId === education.id) {
+          this.editingEducationId = null;
+
+          this.resetEducationForm();
+        }
+
+        this.loadEducations();
+      },
+
+      error: (error) => {
+        console.error('Failed to delete education:', error);
+
+        this.educationErrorMessage = 'Unable to delete education.';
+      },
+    });
+  }
+
+  resetEducationForm(): void {
+    this.educationForm.reset({
+      institution: '',
+      degree: '',
+      fieldOfStudy: '',
+      startYear: new Date().getFullYear(),
+      endYear: null,
     });
   }
 }

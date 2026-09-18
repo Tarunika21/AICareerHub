@@ -118,3 +118,29 @@ small {
   gap: 8px;
   margin-bottom: 18px;
 }
+
+.education-list {
+  display: grid;
+  gap: 16px;
+  margin-bottom: 24px;
+}
+
+.education-card {
+  display: flex;
+  justify-content: space-between;
+  gap: 20px;
+  padding: 18px;
+  border: 1px solid #e5e7eb;
+  border-radius: 10px;
+}
+
+.education-card h3 {
+  margin-top: 0;
+  margin-bottom: 6px;
+}
+
+.education-actions {
+  display: flex;
+  gap: 8px;
+  align-items: flex-start;
+}
