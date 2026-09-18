@@ -538,8 +538,177 @@
           <p>Complete Basic Details to continue.</p>
         </div>
       } @else {
-        <div class="section-placeholder">
-          <p>Project details will be added here.</p>
+        <!-- PROJECT LOADING -->
+
+        @if (isProjectLoading) {
+          <p>Loading projects...</p>
+        } @else {
+          <!-- PROJECT LIST -->
+
+          @if (projects.length === 0) {
+            <div class="section-placeholder">
+              <p>No projects added yet.</p>
+            </div>
+          } @else {
+            <div class="project-list">
+              @for (project of projects; track project.id) {
+                <div class="project-card">
+                  <div class="project-details">
+                    <h3>
+                      {{ project.name }}
+                    </h3>
+
+                    <p>
+                      <strong> Technologies: </strong>
+
+                      {{ project.technologies }}
+                    </p>
+
+                    <p>
+                      {{ project.description }}
+                    </p>
+
+                    @if (project.projectUrl) {
+                      <p>
+                        <a [href]="project.projectUrl" target="_blank" rel="noopener noreferrer">
+                          View Project
+                        </a>
+                      </p>
+                    }
+                  </div>
+
+                  <div class="project-actions">
+                    <button type="button" (click)="editProject(project)">Edit</button>
+
+                    <button type="button" (click)="deleteProject(project)">Delete</button>
+                  </div>
+                </div>
+              }
+            </div>
+          }
+        }
+
+        <!-- ============================================== -->
+        <!-- PROJECT FORM -->
+        <!-- ============================================== -->
+
+        <div id="project-form" class="sub-form">
+          <h3>
+            {{ editingProjectId ? 'Edit Project' : 'Add Project' }}
+          </h3>
+
+          <form [formGroup]="projectForm" (ngSubmit)="saveProject()">
+            <!-- PROJECT NAME -->
+
+            <div class="form-group">
+              <label for="projectName"> Project Name </label>
+
+              <input
+                id="projectName"
+                type="text"
+                formControlName="name"
+                placeholder="e.g. AI Career Hub"
+              />
+
+              @if (projectForm.controls.name.touched && projectForm.controls.name.invalid) {
+                <small> Project name is required. </small>
+              }
+            </div>
+
+            <!-- TECHNOLOGIES -->
+
+            <div class="form-group">
+              <label for="technologies"> Technologies </label>
+
+              <input
+                id="technologies"
+                type="text"
+                formControlName="technologies"
+                placeholder="Angular, ASP.NET Core, PostgreSQL, AWS"
+              />
+
+              @if (
+                projectForm.controls.technologies.touched &&
+                projectForm.controls.technologies.invalid
+              ) {
+                <small> Technologies are required. </small>
+              }
+
+              <span class="field-hint"> Separate technologies using commas. </span>
+            </div>
+
+            <!-- DESCRIPTION -->
+
+            <div class="form-group">
+              <label for="projectDescription"> Description </label>
+
+              <textarea
+                id="projectDescription"
+                formControlName="description"
+                placeholder="Describe the project, what you built and its main features"
+              >
+              </textarea>
+
+              @if (
+                projectForm.controls.description.touched && projectForm.controls.description.invalid
+              ) {
+                <small> Project description is required. </small>
+              }
+            </div>
+
+            <!-- PROJECT URL -->
+
+            <div class="form-group">
+              <label for="projectUrl"> Project URL </label>
+
+              <input
+                id="projectUrl"
+                type="url"
+                formControlName="projectUrl"
+                placeholder="https://github.com/username/project"
+              />
+
+              @if (
+                projectForm.controls.projectUrl.touched && projectForm.controls.projectUrl.invalid
+              ) {
+                <small> Enter a valid URL beginning with http:// or https://. </small>
+              }
+
+              <span class="field-hint">
+                Optional — GitHub repository or deployed application.
+              </span>
+            </div>
+
+            <!-- ACTIONS -->
+
+            <div class="form-actions">
+              <button type="submit" [disabled]="isProjectSaving">
+                {{
+                  isProjectSaving
+                    ? 'Saving...'
+                    : editingProjectId
+                      ? 'Update Project'
+                      : 'Add Project'
+                }}
+              </button>
+
+              @if (editingProjectId) {
+                <button type="button" (click)="cancelProjectEdit()">Cancel</button>
+              }
+            </div>
+          </form>
+
+          @if (projectErrorMessage) {
+            <p class="error-message">
+              {{ projectErrorMessage }}
+            </p>
+          }
+
+          @if (projectSuccessMessage) {
+            <p class="success-message">
+              {{ projectSuccessMessage }}
+            </p>
+          }
         </div>
       }
     </section>

@@ -9,6 +9,9 @@ import { ResumeService } from '../../core/services/resume.service';
 import { ResumeExperienceService } from '../../core/services/resume-experience.service';
 import { ResumeEducation, ResumeEducationRequest } from '../../core/models/resume-education';
 import { ResumeEducationService } from '../../core/services/resume-education.service';
+import { ResumeProject, ResumeProjectRequest } from '../../core/models/resume-project';
+
+import { ResumeProjectService } from '../../core/services/resume-project.service';
 
 @Component({
   selector: 'app-resume-builder',
@@ -57,6 +60,20 @@ export class ResumeBuilder implements OnInit {
   educationSuccessMessage = '';
 
   editingEducationId: string | null = null;
+
+  // ==============================
+  // PROJECTS
+  // ==============================
+
+  projects: ResumeProject[] = [];
+
+  isProjectLoading = false;
+  isProjectSaving = false;
+
+  projectErrorMessage = '';
+  projectSuccessMessage = '';
+
+  editingProjectId: string | null = null;
   // ==============================
   // RESUME FORM
   // ==============================
@@ -69,6 +86,7 @@ export class ResumeBuilder implements OnInit {
 
   experienceForm;
   educationForm;
+  projectForm;
 
   constructor(
     private fb: FormBuilder,
@@ -77,6 +95,7 @@ export class ResumeBuilder implements OnInit {
     private resumeService: ResumeService,
     private resumeExperienceService: ResumeExperienceService,
     private resumeEducationService: ResumeEducationService,
+    private resumeProjectService: ResumeProjectService,
   ) {
     this.resumeForm = this.fb.nonNullable.group({
       title: ['', [Validators.required, Validators.maxLength(150)]],
@@ -106,6 +125,16 @@ export class ResumeBuilder implements OnInit {
 
       endYear: [null as number | null, [Validators.min(1950), Validators.max(2100)]],
     });
+
+    this.projectForm = this.fb.nonNullable.group({
+      name: ['', [Validators.required, Validators.maxLength(150)]],
+
+      description: ['', [Validators.required, Validators.maxLength(2000)]],
+
+      technologies: ['', [Validators.required, Validators.maxLength(1000)]],
+
+      projectUrl: ['', [Validators.maxLength(500), Validators.pattern(/^https?:\/\/.+/i)]],
+    });
   }
 
   // ==============================
@@ -120,6 +149,7 @@ export class ResumeBuilder implements OnInit {
       this.loadResume();
       this.loadExperiences();
       this.loadEducations();
+      this.loadProjects();
     }
   }
 
@@ -604,6 +634,192 @@ export class ResumeBuilder implements OnInit {
       fieldOfStudy: '',
       startYear: new Date().getFullYear(),
       endYear: null,
+    });
+  }
+
+  loadProjects(): void {
+    if (!this.resumeId) {
+      return;
+    }
+
+    this.isProjectLoading = true;
+    this.projectErrorMessage = '';
+
+    this.resumeProjectService.getAll(this.resumeId).subscribe({
+      next: (projects) => {
+        this.projects = projects;
+
+        this.isProjectLoading = false;
+      },
+
+      error: (error) => {
+        console.error('Failed to load projects:', error);
+
+        this.projectErrorMessage = 'Unable to load projects.';
+
+        this.isProjectLoading = false;
+      },
+    });
+  }
+
+  saveProject(): void {
+    if (!this.resumeId) {
+      this.projectErrorMessage = 'Save Basic Details first.';
+
+      return;
+    }
+
+    if (this.projectForm.invalid) {
+      this.projectForm.markAllAsTouched();
+
+      return;
+    }
+
+    this.isProjectSaving = true;
+
+    this.projectErrorMessage = '';
+    this.projectSuccessMessage = '';
+
+    const formValue = this.projectForm.getRawValue();
+
+    const request: ResumeProjectRequest = {
+      name: formValue.name.trim(),
+
+      description: formValue.description.trim(),
+
+      technologies: formValue.technologies.trim(),
+
+      projectUrl: formValue.projectUrl.trim() || null,
+    };
+
+    // ============================
+    // UPDATE PROJECT
+    // ============================
+
+    if (this.editingProjectId) {
+      this.resumeProjectService.update(this.resumeId, this.editingProjectId, request).subscribe({
+        next: () => {
+          this.isProjectSaving = false;
+
+          this.projectSuccessMessage = 'Project updated successfully.';
+
+          this.editingProjectId = null;
+
+          this.resetProjectForm();
+
+          this.loadProjects();
+        },
+
+        error: (error) => {
+          console.error('Failed to update project:', error);
+
+          this.isProjectSaving = false;
+
+          this.projectErrorMessage = 'Unable to update project.';
+        },
+      });
+
+      return;
+    }
+
+    // ============================
+    // CREATE PROJECT
+    // ============================
+
+    this.resumeProjectService.create(this.resumeId, request).subscribe({
+      next: () => {
+        this.isProjectSaving = false;
+
+        this.projectSuccessMessage = 'Project added successfully.';
+
+        this.resetProjectForm();
+
+        this.loadProjects();
+      },
+
+      error: (error) => {
+        console.error('Failed to create project:', error);
+
+        this.isProjectSaving = false;
+
+        this.projectErrorMessage = 'Unable to add project.';
+      },
+    });
+  }
+
+  editProject(project: ResumeProject): void {
+    this.editingProjectId = project.id;
+
+    this.projectErrorMessage = '';
+    this.projectSuccessMessage = '';
+
+    this.projectForm.patchValue({
+      name: project.name,
+
+      description: project.description,
+
+      technologies: project.technologies,
+
+      projectUrl: project.projectUrl ?? '',
+    });
+
+    setTimeout(() => {
+      document.getElementById('project-form')?.scrollIntoView({
+        behavior: 'smooth',
+      });
+    }, 0);
+  }
+
+  cancelProjectEdit(): void {
+    this.editingProjectId = null;
+
+    this.resetProjectForm();
+
+    this.projectErrorMessage = '';
+    this.projectSuccessMessage = '';
+  }
+
+  deleteProject(project: ResumeProject): void {
+    if (!this.resumeId) {
+      return;
+    }
+
+    const confirmed = confirm(`Delete project "${project.name}"?`);
+
+    if (!confirmed) {
+      return;
+    }
+
+    this.projectErrorMessage = '';
+    this.projectSuccessMessage = '';
+
+    this.resumeProjectService.delete(this.resumeId, project.id).subscribe({
+      next: () => {
+        this.projectSuccessMessage = 'Project deleted successfully.';
+
+        if (this.editingProjectId === project.id) {
+          this.editingProjectId = null;
+
+          this.resetProjectForm();
+        }
+
+        this.loadProjects();
+      },
+
+      error: (error) => {
+        console.error('Failed to delete project:', error);
+
+        this.projectErrorMessage = 'Unable to delete project.';
+      },
+    });
+  }
+
+  resetProjectForm(): void {
+    this.projectForm.reset({
+      name: '',
+      description: '',
+      technologies: '',
+      projectUrl: '',
     });
   }
 }
