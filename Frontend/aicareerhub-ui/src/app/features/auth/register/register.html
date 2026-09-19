@@ -1,43 +1,52 @@
-<div class="register-container">
-  <div class="register-card">
+<div class="auth-page">
+  <div class="auth-card">
+    <div class="brand">
+      <span class="brand-icon">AI</span>
+      <span>AI Career Hub</span>
+    </div>
 
-    <h1>AI Career Hub</h1>
-    <h2>Create your account</h2>
+    <div class="auth-header">
+      <h1>Create your account</h1>
+      <p>Start building your career profile and managing your job search.</p>
+    </div>
 
     <form [formGroup]="registerForm" (ngSubmit)="onSubmit()">
+      <div class="name-grid">
+        <div class="form-group">
+          <label for="firstName">First name</label>
+          <input
+            id="firstName"
+            type="text"
+            formControlName="firstName"
+            placeholder="First name"
+            autocomplete="given-name"
+          />
 
-      <div class="form-group">
-        <label for="firstName">First name</label>
-        <input
-          id="firstName"
-          type="text"
-          formControlName="firstName"
-          placeholder="Enter your first name"
-        />
+          @if (
+            registerForm.controls.firstName.touched &&
+            registerForm.controls.firstName.invalid
+          ) {
+            <small>First name is required.</small>
+          }
+        </div>
 
-        @if (
-          registerForm.controls.firstName.touched &&
-          registerForm.controls.firstName.invalid
-        ) {
-          <small>First name is required.</small>
-        }
-      </div>
+        <div class="form-group">
+          <label for="lastName">Last name</label>
+          <input
+            id="lastName"
+            type="text"
+            formControlName="lastName"
+            placeholder="Last name"
+            autocomplete="family-name"
+          />
 
-      <div class="form-group">
-        <label for="lastName">Last name</label>
-        <input
-          id="lastName"
-          type="text"
-          formControlName="lastName"
-          placeholder="Enter your last name"
-        />
-
-        @if (
-          registerForm.controls.lastName.touched &&
-          registerForm.controls.lastName.invalid
-        ) {
-          <small>Last name is required.</small>
-        }
+          @if (
+            registerForm.controls.lastName.touched &&
+            registerForm.controls.lastName.invalid
+          ) {
+            <small>Last name is required.</small>
+          }
+        </div>
       </div>
 
       <div class="form-group">
@@ -47,6 +56,7 @@
           type="email"
           formControlName="email"
           placeholder="Enter your email"
+          autocomplete="email"
         />
 
         @if (
@@ -64,6 +74,7 @@
           type="password"
           formControlName="password"
           placeholder="Minimum 8 characters"
+          autocomplete="new-password"
         />
 
         @if (
@@ -75,21 +86,22 @@
       </div>
 
       @if (errorMessage) {
-        <p class="error-message">
+        <div class="error-message">
           {{ errorMessage }}
-        </p>
+        </div>
       }
 
-      <button type="submit" [disabled]="isLoading">
-        {{ isLoading ? 'Creating account...' : 'Create account' }}
+      <button
+        type="submit"
+        class="primary-button"
+        [disabled]="isLoading">
+        {{ isLoading ? 'Creating account...' : 'Create Account' }}
       </button>
-
     </form>
 
-    <p>
+    <p class="auth-footer">
       Already have an account?
-      <a routerLink="/login">Login</a>
+      <a routerLink="/login">Sign in</a>
     </p>
-
   </div>
 </div>

@@ -1,19 +1,24 @@
-<div class="login-container">
-  <div class="login-card">
+<div class="auth-page">
+  <div class="auth-card">
+    <div class="brand">
+      <span class="brand-icon">AI</span>
+      <span>AI Career Hub</span>
+    </div>
 
-    <h1>AI Career Hub</h1>
-    <h2>Welcome back</h2>
+    <div class="auth-header">
+      <h1>Welcome back</h1>
+      <p>Sign in to continue managing your career journey.</p>
+    </div>
 
     <form [formGroup]="loginForm" (ngSubmit)="onSubmit()">
-
       <div class="form-group">
         <label for="email">Email</label>
-
         <input
           id="email"
           type="email"
           formControlName="email"
           placeholder="Enter your email"
+          autocomplete="email"
         />
 
         @if (
@@ -26,12 +31,12 @@
 
       <div class="form-group">
         <label for="password">Password</label>
-
         <input
           id="password"
           type="password"
           formControlName="password"
           placeholder="Enter your password"
+          autocomplete="current-password"
         />
 
         @if (
@@ -43,21 +48,22 @@
       </div>
 
       @if (errorMessage) {
-        <p class="error-message">
+        <div class="error-message">
           {{ errorMessage }}
-        </p>
+        </div>
       }
 
-      <button type="submit" [disabled]="isLoading">
-        {{ isLoading ? 'Signing in...' : 'Login' }}
+      <button
+        type="submit"
+        class="primary-button"
+        [disabled]="isLoading">
+        {{ isLoading ? 'Signing in...' : 'Sign In' }}
       </button>
-
     </form>
 
-    <p>
+    <p class="auth-footer">
       Don't have an account?
       <a routerLink="/register">Create account</a>
     </p>
-
   </div>
 </div>
