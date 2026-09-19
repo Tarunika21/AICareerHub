@@ -93,7 +93,45 @@
             placeholder="Write a short professional summary"
           >
           </textarea>
+
+          <div class="ai-action">
+            <button type="button" (click)="improveSummary()" [disabled]="isSummaryAiLoading">
+              {{ isSummaryAiLoading ? 'Generating...' : 'Improve Summary' }}
+            </button>
+
+            <span class="ai-demo-label"> Demo AI </span>
+          </div>
+
+          @if (summaryAiErrorMessage) {
+            <p class="error-message">
+              {{ summaryAiErrorMessage }}
+            </p>
+          }
         </div>
+
+        <!-- AI SUMMARY PREVIEW -->
+
+        @if (suggestedSummary) {
+          <div class="ai-suggestion">
+            <div class="ai-suggestion-header">
+              <div>
+                <h3>Suggested Summary</h3>
+
+                <span class="ai-demo-label"> Mock AI response </span>
+              </div>
+            </div>
+
+            <p>
+              {{ suggestedSummary }}
+            </p>
+
+            <div class="form-actions">
+              <button type="button" (click)="useSuggestedSummary()">Use This Summary</button>
+
+              <button type="button" (click)="discardSuggestedSummary()">Discard</button>
+            </div>
+          </div>
+        }
 
         <!-- SAVE BASIC DETAILS -->
 
@@ -281,7 +319,53 @@
                 placeholder="Describe your responsibilities, achievements and impact"
               >
               </textarea>
+
+              <div class="ai-action">
+                <button
+                  type="button"
+                  (click)="improveExperienceDescription()"
+                  [disabled]="isExperienceAiLoading"
+                >
+                  {{ isExperienceAiLoading ? 'Generating...' : 'Improve Description' }}
+                </button>
+
+                <span class="ai-demo-label"> Demo AI </span>
+              </div>
+
+              @if (experienceAiErrorMessage) {
+                <p class="error-message">
+                  {{ experienceAiErrorMessage }}
+                </p>
+              }
             </div>
+
+            <!-- AI EXPERIENCE PREVIEW -->
+
+            @if (suggestedExperienceDescription) {
+              <div class="ai-suggestion">
+                <div class="ai-suggestion-header">
+                  <div>
+                    <h3>Suggested Experience Description</h3>
+
+                    <span class="ai-demo-label"> Mock AI response </span>
+                  </div>
+                </div>
+
+                <p>
+                  {{ suggestedExperienceDescription }}
+                </p>
+
+                <div class="form-actions">
+                  <button type="button" (click)="useSuggestedExperienceDescription()">
+                    Use This Description
+                  </button>
+
+                  <button type="button" (click)="discardSuggestedExperienceDescription()">
+                    Discard
+                  </button>
+                </div>
+              </div>
+            }
 
             <!-- EXPERIENCE FORM BUTTONS -->
 
@@ -717,6 +801,125 @@
     <!-- BOTTOM ACTION -->
     <!-- ================================================== -->
 
+    <!-- ===================================== -->
+<!-- AI RESUME SUGGESTIONS -->
+<!-- ===================================== -->
+
+<section class="builder-section">
+
+  <div class="section-header">
+
+    <div>
+      <h2>Resume Suggestions</h2>
+
+      <p>
+        Compare your resume with a job description
+        and receive improvement suggestions.
+      </p>
+    </div>
+
+    <span class="ai-demo-label">
+      Demo AI
+    </span>
+
+  </div>
+
+
+  @if (!resumeId) {
+
+    <p class="field-hint">
+      Save Basic Details first to use resume suggestions.
+    </p>
+
+  } @else {
+
+    <div class="form-group">
+
+      <label for="jobDescription">
+        Job Description
+      </label>
+
+      <textarea
+        id="jobDescription"
+        [(ngModel)]="jobDescription"
+        placeholder="Paste the job description here..."
+        rows="10">
+      </textarea>
+
+      <p class="field-hint">
+        Paste the job description for the role
+        you want to compare against.
+      </p>
+
+    </div>
+
+
+    <button
+      type="button"
+      (click)="getResumeSuggestions()"
+      [disabled]="isResumeSuggestionsLoading">
+
+      {{
+        isResumeSuggestionsLoading
+          ? 'Analyzing...'
+          : 'Analyze Resume'
+      }}
+
+    </button>
+
+
+    @if (resumeSuggestionsErrorMessage) {
+
+      <p class="error-message">
+        {{ resumeSuggestionsErrorMessage }}
+      </p>
+
+    }
+
+
+    @if (resumeSuggestions.length > 0) {
+
+      <div class="ai-suggestion resume-suggestions">
+
+        <div class="ai-suggestion-header">
+
+          <div>
+
+            <h3>
+              Resume Improvement Suggestions
+            </h3>
+
+            <span class="ai-demo-label">
+              Mock AI response
+            </span>
+
+          </div>
+
+        </div>
+
+
+        <ol>
+
+          @for (
+            suggestion of resumeSuggestions;
+            track $index
+          ) {
+
+            <li>
+              {{ suggestion }}
+            </li>
+
+          }
+
+        </ol>
+
+      </div>
+
+    }
+
+  }
+
+</section>
     @if (resumeId) {
       <div class="builder-footer">
         <a routerLink="/resumes" class="back-link"> ← Back to My Resumes </a>

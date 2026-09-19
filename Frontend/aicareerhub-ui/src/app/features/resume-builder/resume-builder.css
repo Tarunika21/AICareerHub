@@ -169,3 +169,33 @@ small {
   gap: 8px;
   align-items: flex-start;
 }
+
+.ai-action {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  margin-top: 10px;
+}
+
+.ai-demo-label {
+  display: inline-block;
+  font-size: 12px;
+  color: #667085;
+}
+
+.ai-suggestion {
+  padding: 18px;
+  margin: 18px 0;
+  border: 1px solid #d0d5dd;
+  border-radius: 10px;
+}
+
+.ai-suggestion-header {
+  display: flex;
+  justify-content: space-between;
+  margin-bottom: 12px;
+}
+
+.ai-suggestion-header h3 {
+  margin: 0 0 4px;
+}
