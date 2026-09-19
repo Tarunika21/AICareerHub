@@ -1,302 +1,316 @@
 <app-navbar></app-navbar>
 
 <main class="job-tracker">
-  <!-- ========================================= -->
-  <!-- PAGE HEADER -->
-  <!-- ========================================= -->
-
-  <div class="page-header">
+  <header class="page-header">
     <div>
       <h1>Job Tracker</h1>
-
-      <p>Manage and track your job applications.</p>
+      <p>Manage and track your job applications in one place.</p>
     </div>
-  </div>
-
-  <!-- ========================================= -->
-  <!-- ADD / EDIT JOB APPLICATION -->
-  <!-- ========================================= -->
+  </header>
 
   <section class="add-job-section">
-    <h2>
-      {{ editingApplicationId ? 'Edit Job Application' : 'Add Job Application' }}
-    </h2>
+    <div class="section-header">
+      <div>
+        <h2>
+          {{ editingApplicationId ? 'Edit Job Application' : 'Add Job Application' }}
+        </h2>
+        <p>
+          {{
+            editingApplicationId
+              ? 'Update the details of this application.'
+              : 'Save a job application to track its progress.'
+          }}
+        </p>
+      </div>
+    </div>
 
     <form [formGroup]="jobForm" (ngSubmit)="saveApplication()">
-      <!-- Company -->
+      <div class="job-form-grid">
+        <div class="form-group">
+          <label for="companyName">Company</label>
+          <input
+            id="companyName"
+            type="text"
+            formControlName="companyName"
+            placeholder="e.g. Atlassian"
+          />
 
-      <div class="form-group">
-        <label for="companyName"> Company </label>
+          @if (
+            jobForm.controls.companyName.touched &&
+            jobForm.controls.companyName.invalid
+          ) {
+            <small>Company name is required.</small>
+          }
+        </div>
 
-        <input
-          id="companyName"
-          type="text"
-          formControlName="companyName"
-          placeholder="e.g. Atlassian"
-        />
+        <div class="form-group">
+          <label for="jobTitle">Job Title</label>
+          <input
+            id="jobTitle"
+            type="text"
+            formControlName="jobTitle"
+            placeholder="e.g. Software Engineer"
+          />
 
-        @if (jobForm.controls.companyName.touched && jobForm.controls.companyName.invalid) {
-          <small> Company name is required. </small>
-        }
+          @if (
+            jobForm.controls.jobTitle.touched &&
+            jobForm.controls.jobTitle.invalid
+          ) {
+            <small>Job title is required.</small>
+          }
+        </div>
+
+        <div class="form-group">
+          <label for="location">Location</label>
+          <input
+            id="location"
+            type="text"
+            formControlName="location"
+            placeholder="e.g. Remote"
+          />
+
+          @if (
+            jobForm.controls.location.touched &&
+            jobForm.controls.location.invalid
+          ) {
+            <small>Location is required.</small>
+          }
+        </div>
+
+        <div class="form-group">
+          <label for="status">Status</label>
+          <select id="status" formControlName="status">
+            <option value="Applied">Applied</option>
+            <option value="Interview">Interview</option>
+            <option value="Offer">Offer</option>
+            <option value="Rejected">Rejected</option>
+            <option value="Withdrawn">Withdrawn</option>
+          </select>
+        </div>
+
+        <div class="form-group">
+          <label for="appliedDate">Applied Date</label>
+          <input
+            id="appliedDate"
+            type="date"
+            formControlName="appliedDate"
+          />
+
+          @if (
+            jobForm.controls.appliedDate.touched &&
+            jobForm.controls.appliedDate.invalid
+          ) {
+            <small>Applied date is required.</small>
+          }
+        </div>
+
+        <div class="form-group full-width">
+          <label for="jobUrl">Job URL</label>
+          <input
+            id="jobUrl"
+            type="url"
+            formControlName="jobUrl"
+            placeholder="https://..."
+          />
+          <span class="field-hint">Optional link to the job posting.</span>
+        </div>
+
+        <div class="form-group full-width">
+          <label for="notes">Notes</label>
+          <textarea
+            id="notes"
+            formControlName="notes"
+            placeholder="Interview notes, recruiter details or anything you want to remember"
+          ></textarea>
+        </div>
       </div>
 
-      <!-- Job Title -->
-
-      <div class="form-group">
-        <label for="jobTitle"> Job Title </label>
-
-        <input
-          id="jobTitle"
-          type="text"
-          formControlName="jobTitle"
-          placeholder="e.g. Software Engineer"
-        />
-
-        @if (jobForm.controls.jobTitle.touched && jobForm.controls.jobTitle.invalid) {
-          <small> Job title is required. </small>
-        }
-      </div>
-
-      <!-- Location -->
-
-      <div class="form-group">
-        <label for="location"> Location </label>
-
-        <input id="location" type="text" formControlName="location" placeholder="e.g. Remote" />
-
-        @if (jobForm.controls.location.touched && jobForm.controls.location.invalid) {
-          <small> Location is required. </small>
-        }
-      </div>
-
-      <!-- Status -->
-
-      <div class="form-group">
-        <label for="status"> Status </label>
-
-        <select id="status" formControlName="status">
-          <option value="Applied">Applied</option>
-
-          <option value="Interview">Interview</option>
-
-          <option value="Offer">Offer</option>
-
-          <option value="Rejected">Rejected</option>
-
-          <option value="Withdrawn">Withdrawn</option>
-        </select>
-      </div>
-
-      <!-- Applied Date -->
-
-      <div class="form-group">
-        <label for="appliedDate"> Applied Date </label>
-
-        <input id="appliedDate" type="date" formControlName="appliedDate" />
-
-        @if (jobForm.controls.appliedDate.touched && jobForm.controls.appliedDate.invalid) {
-          <small> Applied date is required. </small>
-        }
-      </div>
-
-      <!-- Job URL -->
-
-      <div class="form-group">
-        <label for="jobUrl"> Job URL </label>
-
-        <input id="jobUrl" type="url" formControlName="jobUrl" placeholder="https://..." />
-      </div>
-
-      <!-- Notes -->
-
-      <div class="form-group">
-        <label for="notes"> Notes </label>
-
-        <textarea id="notes" formControlName="notes" placeholder="Optional notes"> </textarea>
-      </div>
-
-      <!-- Form Actions -->
+      @if (successMessage) {
+        <div class="success-message">
+          {{ successMessage }}
+        </div>
+      }
 
       <div class="form-actions">
-        <button type="submit" [disabled]="isSaving">
+        <button
+          type="submit"
+          class="primary-button"
+          [disabled]="isSaving">
           {{
-            isSaving ? 'Saving...' : editingApplicationId ? 'Update Application' : 'Add Application'
+            isSaving
+              ? 'Saving...'
+              : editingApplicationId
+                ? 'Update Application'
+                : 'Add Application'
           }}
         </button>
 
         @if (editingApplicationId) {
-          <button type="button" (click)="cancelEdit()" [disabled]="isSaving">Cancel</button>
+          <button
+            type="button"
+            class="secondary-button"
+            (click)="cancelEdit()"
+            [disabled]="isSaving">
+            Cancel
+          </button>
         }
       </div>
     </form>
-
-    <!-- Success Message -->
-
-    @if (successMessage) {
-      <p class="success-message">
-        {{ successMessage }}
-      </p>
-    }
   </section>
 
-  <!-- ========================================= -->
-  <!-- SEARCH & FILTER -->
-  <!-- ========================================= -->
-
   <section class="filter-section">
-    <h2>Search & Filter</h2>
+    <div class="section-header">
+      <div>
+        <h2>Search & Filter</h2>
+        <p>Find applications by company, job title or status.</p>
+      </div>
+    </div>
 
     <form [formGroup]="filterForm" (ngSubmit)="applyFilters()">
       <div class="filter-grid">
-        <!-- Search -->
-
         <div class="form-group">
-          <label for="search"> Search </label>
-
+          <label for="search">Search</label>
           <input
             id="search"
             type="text"
             formControlName="search"
-            placeholder="Company or Job Title"
+            placeholder="Company or job title"
           />
         </div>
 
-        <!-- Status Filter -->
-
         <div class="form-group">
-          <label for="filterStatus"> Status </label>
-
+          <label for="filterStatus">Status</label>
           <select id="filterStatus" formControlName="status">
             <option value="">All Statuses</option>
-
             <option value="Applied">Applied</option>
-
             <option value="Interview">Interview</option>
-
             <option value="Offer">Offer</option>
-
             <option value="Rejected">Rejected</option>
-
             <option value="Withdrawn">Withdrawn</option>
           </select>
         </div>
       </div>
 
-      <!-- Filter Actions -->
-
       <div class="filter-actions">
-        <button type="submit">Apply Filters</button>
-
-        <button type="button" (click)="clearFilters()">Clear Filters</button>
+        <button type="submit" class="primary-button">
+          Apply Filters
+        </button>
+        <button
+          type="button"
+          class="secondary-button"
+          (click)="clearFilters()">
+          Clear Filters
+        </button>
       </div>
     </form>
   </section>
 
-  <!-- ========================================= -->
-  <!-- LOADING -->
-  <!-- ========================================= -->
-
   @if (isLoading) {
-    <p>Loading applications...</p>
+    <div class="state-card">
+      <p>Loading applications...</p>
+    </div>
   }
-
-  <!-- ========================================= -->
-  <!-- ERROR -->
-  <!-- ========================================= -->
 
   @if (errorMessage) {
-    <p class="error-message">
+    <div class="error-message">
       {{ errorMessage }}
-    </p>
+    </div>
   }
 
-  <!-- ========================================= -->
-  <!-- APPLICATION LIST -->
-  <!-- ========================================= -->
-
   @if (!isLoading && !errorMessage) {
-    <!-- Empty State -->
-
-    @if (applications.length === 0) {
-      <div class="empty-state">
-        <h2>No job applications found</h2>
-
-        <p>Try changing the search text or selected status, or add a new job application.</p>
+    <section class="applications-section">
+      <div class="applications-header">
+        <div>
+          <h2>Your Applications</h2>
+          <p>
+            {{ applications.length }}
+            {{ applications.length === 1 ? 'application' : 'applications' }}
+          </p>
+        </div>
       </div>
-    } @else {
-      <!-- Applications -->
 
-      <div class="applications-list">
-        @for (application of applications; track application.id) {
-          <div class="application-card">
-            <!-- Job Title -->
+      @if (applications.length === 0) {
+        <div class="empty-state">
+          <div class="empty-icon">JOB</div>
+          <h3>No job applications found</h3>
+          <p>
+            Try changing your filters or add a new job application above.
+          </p>
+        </div>
+      } @else {
+        <div class="applications-list">
+          @for (application of applications; track application.id) {
+            <article class="application-card">
+              <div class="application-top">
+                <div>
+                  <h3>{{ application.jobTitle }}</h3>
+                  <p class="company-name">
+                    {{ application.companyName }}
+                  </p>
+                </div>
 
-            <h2>
-              {{ application.jobTitle }}
-            </h2>
+                <span
+                  class="status-badge"
+                  [class.status-applied]="application.status === 'Applied'"
+                  [class.status-interview]="application.status === 'Interview'"
+                  [class.status-offer]="application.status === 'Offer'"
+                  [class.status-rejected]="application.status === 'Rejected'"
+                  [class.status-withdrawn]="application.status === 'Withdrawn'">
+                  {{ application.status }}
+                </span>
+              </div>
 
-            <!-- Company -->
+              <div class="application-details">
+                <div class="detail">
+                  <span>Location</span>
+                  <strong>{{ application.location }}</strong>
+                </div>
 
-            <p>
-              <strong> Company: </strong>
+                <div class="detail">
+                  <span>Applied</span>
+                  <strong>{{ application.appliedDate }}</strong>
+                </div>
+              </div>
 
-              {{ application.companyName }}
-            </p>
+              @if (application.notes) {
+                <div class="application-notes">
+                  <span>Notes</span>
+                  <p>{{ application.notes }}</p>
+                </div>
+              }
 
-            <!-- Location -->
+              <div class="application-actions">
+                <div class="application-links">
+                  @if (application.jobUrl) {
+                    <a
+                      [href]="application.jobUrl"
+                      target="_blank"
+                      rel="noopener noreferrer">
+                      View Job
+                    </a>
+                  }
+                </div>
 
-            <p>
-              <strong> Location: </strong>
+                <div class="card-buttons">
+                  <button
+                    type="button"
+                    class="edit-button"
+                    (click)="editApplication(application)">
+                    Edit
+                  </button>
 
-              {{ application.location }}
-            </p>
-
-            <!-- Status -->
-
-            <p>
-              <strong> Status: </strong>
-
-              {{ application.status }}
-            </p>
-
-            <!-- Applied Date -->
-
-            <p>
-              <strong> Applied: </strong>
-
-              {{ application.appliedDate }}
-            </p>
-
-            <!-- Job URL -->
-
-            @if (application.jobUrl) {
-              <p>
-                <a [href]="application.jobUrl" target="_blank" rel="noopener noreferrer">
-                  View Job
-                </a>
-              </p>
-            }
-
-            <!-- Notes -->
-
-            @if (application.notes) {
-              <p>
-                <strong> Notes: </strong>
-
-                {{ application.notes }}
-              </p>
-            }
-
-            <!-- Application Actions -->
-
-            <div class="application-actions">
-              <button type="button" (click)="editApplication(application)">Edit</button>
-
-              <button type="button" (click)="deleteApplication(application)">Delete</button>
-            </div>
-          </div>
-        }
-      </div>
-    }
+                  <button
+                    type="button"
+                    class="delete-button"
+                    (click)="deleteApplication(application)">
+                    Delete
+                  </button>
+                </div>
+              </div>
+            </article>
+          }
+        </div>
+      }
+    </section>
   }
 </main>
