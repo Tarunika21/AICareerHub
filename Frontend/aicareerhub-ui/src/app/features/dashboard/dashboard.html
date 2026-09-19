@@ -1,56 +1,148 @@
 <app-navbar></app-navbar>
 
 <main class="dashboard">
-
-  <h1>Dashboard</h1>
-  <p class="subtitle">
-    Track your job application progress.
-  </p>
-
-  @if (isLoading) {
-    <p>Loading dashboard...</p>
-  }
-
-  @if (errorMessage) {
-    <p class="error-message">
-      {{ errorMessage }}
-    </p>
-  }
-
-  @if (stats) {
-    <div class="stats-grid">
-
-      <div class="stat-card">
-        <h3>Total Applications</h3>
-        <p>{{ stats.total }}</p>
-      </div>
-
-      <div class="stat-card">
-        <h3>Applied</h3>
-        <p>{{ stats.applied }}</p>
-      </div>
-
-      <div class="stat-card">
-        <h3>Interviews</h3>
-        <p>{{ stats.interview }}</p>
-      </div>
-
-      <div class="stat-card">
-        <h3>Offers</h3>
-        <p>{{ stats.offer }}</p>
-      </div>
-
-      <div class="stat-card">
-        <h3>Rejected</h3>
-        <p>{{ stats.rejected }}</p>
-      </div>
-
-      <div class="stat-card">
-        <h3>Withdrawn</h3>
-        <p>{{ stats.withdrawn }}</p>
-      </div>
-
+  <header class="dashboard-header">
+    <div>
+      <h1>Dashboard</h1>
+      <p>Manage your career profile, resumes and job search from one place.</p>
     </div>
-  }
+  </header>
 
+  <section class="dashboard-section">
+    <div class="section-heading">
+      <div>
+        <h2>Job Search Overview</h2>
+        <p>Track the progress of your job applications.</p>
+      </div>
+      <a routerLink="/job-tracker" class="secondary-link">View Job Tracker</a>
+    </div>
+
+    @if (isLoadingStats) {
+      <p class="state-message">Loading job statistics...</p>
+    } @else if (statsErrorMessage) {
+      <p class="error-message">{{ statsErrorMessage }}</p>
+    } @else if (stats) {
+      <div class="stats-grid">
+        <div class="stat-card">
+          <span>Total Applications</span>
+          <strong>{{ stats.total }}</strong>
+        </div>
+        <div class="stat-card">
+          <span>Applied</span>
+          <strong>{{ stats.applied }}</strong>
+        </div>
+        <div class="stat-card">
+          <span>Interviews</span>
+          <strong>{{ stats.interview }}</strong>
+        </div>
+        <div class="stat-card">
+          <span>Offers</span>
+          <strong>{{ stats.offer }}</strong>
+        </div>
+        <div class="stat-card">
+          <span>Rejected</span>
+          <strong>{{ stats.rejected }}</strong>
+        </div>
+        <div class="stat-card">
+          <span>Withdrawn</span>
+          <strong>{{ stats.withdrawn }}</strong>
+        </div>
+      </div>
+    }
+  </section>
+
+  <div class="overview-grid">
+    <section class="dashboard-section overview-card">
+      <div class="section-heading">
+        <div>
+          <h2>Career Profile</h2>
+          <p>Your current career goals.</p>
+        </div>
+      </div>
+
+      @if (isLoadingProfile) {
+        <p class="state-message">Loading career profile...</p>
+      } @else if (careerProfile) {
+        <div class="profile-details">
+          <div>
+            <span>Target Role</span>
+            <strong>{{ careerProfile.targetRole }}</strong>
+          </div>
+          <div>
+            <span>Current Role</span>
+            <strong>{{ careerProfile.currentJobTitle }}</strong>
+          </div>
+          <div>
+            <span>Experience</span>
+            <strong>{{ careerProfile.yearsOfExperience }} years</strong>
+          </div>
+          <div>
+            <span>Preferred Locations</span>
+            <strong>{{ careerProfile.preferredLocations }}</strong>
+          </div>
+        </div>
+        <a routerLink="/career-profile" class="primary-link">View Career Profile</a>
+      } @else {
+        <div class="empty-state">
+          <h3>No career profile yet</h3>
+          <p>Create your profile to define your target role, skills and career goals.</p>
+          <a routerLink="/career-profile" class="primary-link">Create Career Profile</a>
+        </div>
+      }
+    </section>
+
+    <section class="dashboard-section overview-card">
+      <div class="section-heading">
+        <div>
+          <h2>Resumes</h2>
+          <p>Build and improve resumes for your applications.</p>
+        </div>
+      </div>
+
+      @if (isLoadingResumes) {
+        <p class="state-message">Loading resumes...</p>
+      } @else {
+        <div class="resume-summary">
+          <strong>{{ resumes.length }}</strong>
+          <span>{{ resumes.length === 1 ? 'Resume Created' : 'Resumes Created' }}</span>
+        </div>
+
+        @if (resumes.length > 0) {
+          <div class="latest-resume">
+            <span>Latest Resume</span>
+            <strong>{{ resumes[0].title }}</strong>
+          </div>
+        }
+
+        <div class="card-actions">
+          <a routerLink="/resumes" class="primary-link">Manage Resumes</a>
+          <a routerLink="/resumes/new" class="secondary-link">Create Resume</a>
+        </div>
+      }
+    </section>
+  </div>
+
+  <section class="dashboard-section">
+    <div class="section-heading">
+      <div>
+        <h2>Quick Actions</h2>
+        <p>Continue with the most common career tasks.</p>
+      </div>
+    </div>
+
+    <div class="quick-actions">
+      <a routerLink="/job-tracker" class="quick-action-card">
+        <strong>Track Applications</strong>
+        <span>Add, update and review your job applications.</span>
+      </a>
+      <a routerLink="/resumes/new" class="quick-action-card">
+        <strong>Build a Resume</strong>
+        <span>Create a resume and improve it with resume assistance.</span>
+      </a>
+      <a routerLink="/career-profile" class="quick-action-card">
+        <strong>Career Profile</strong>
+        <span>Update your skills, target role and career preferences.</span>
+      </a>
+    </div>
+  </section>
 </main>

@@ -1,11 +1,29 @@
-<nav class="navbar">
-  <div class="brand">AI Career Hub</div>
+<header class="navbar-wrapper">
+  <nav class="navbar">
+    <a routerLink="/dashboard" class="brand">
+      <span class="brand-icon">AI</span>
+      <span>AI Career Hub</span>
+    </a>
 
-  <div class="nav-links">
-    <a routerLink="/dashboard">Dashboard</a>
-    <a routerLink="/career-profile" routerLinkActive="active"> Career Profile </a>
-    <a routerLink="/resumes" routerLinkActive="active"> Resumes </a>
-    <a routerLink="/job-tracker">Job Tracker</a>
-    <button type="button" (click)="logout()">Logout</button>
-  </div>
-</nav>
+    <div class="nav-links">
+      <a
+        routerLink="/dashboard"
+        routerLinkActive="active"
+        [routerLinkActiveOptions]="{ exact: true }">
+        Dashboard
+      </a>
+      <a routerLink="/career-profile" routerLinkActive="active">
+        Career Profile
+      </a>
+      <a routerLink="/resumes" routerLinkActive="active">
+        Resumes
+      </a>
+      <a routerLink="/job-tracker" routerLinkActive="active">
+        Job Tracker
+      </a>
+      <button type="button" class="logout-button" (click)="logout()">
+        Logout
+      </button>
+    </div>
+  </nav>
+</header>
