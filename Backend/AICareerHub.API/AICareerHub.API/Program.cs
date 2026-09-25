@@ -13,44 +13,41 @@ using System.Text;
 
 var builder = WebApplication.CreateBuilder(args);
 
-// Add services to the container.
-
 builder.Services.AddControllers();
 
 if (builder.Environment.IsEnvironment("Testing"))
 {
-    builder.Services.AddDbContext<ApplicationDbContext>(
-        options =>
-            options.UseInMemoryDatabase(
-                "AICareerHubIntegrationTests"));
+    builder.Services.AddDbContext<ApplicationDbContext>(options =>
+        options.UseInMemoryDatabase("AICareerHubIntegrationTests"));
 }
 else
 {
-    builder.Services.AddDbContext<ApplicationDbContext>(
-        options =>
-            options.UseNpgsql(
-                builder.Configuration.GetConnectionString(
-                    "DefaultConnection")));
+    var connectionString = builder.Configuration.GetConnectionString("DefaultConnection")
+        ?? throw new InvalidOperationException("DefaultConnection is not configured.");
+
+    builder.Services.AddDbContext<ApplicationDbContext>(options =>
+        options.UseNpgsql(connectionString));
 }
 
 builder.Services.AddScoped<IUserRepository, UserRepository>();
 builder.Services.AddScoped<ICareerProfileRepository, CareerProfileRepository>();
 builder.Services.AddScoped<IResumeRepository, ResumeRepository>();
-builder.Services.AddScoped<IResumeExperienceRepository,ResumeExperienceRepository>();
-builder.Services.AddScoped<IResumeProjectRepository,ResumeProjectRepository>();
+builder.Services.AddScoped<IResumeExperienceRepository, ResumeExperienceRepository>();
+builder.Services.AddScoped<IResumeProjectRepository, ResumeProjectRepository>();
 builder.Services.AddScoped<IResumeEducationRepository, ResumeEducationRepository>();
-builder.Services.AddScoped<IJobApplicationRepository,JobApplicationRepository>();
+builder.Services.AddScoped<IJobApplicationRepository, JobApplicationRepository>();
 
 builder.Services.AddScoped<IUserService, UserService>();
 builder.Services.AddScoped<IAuthService, AuthService>();
 builder.Services.AddScoped<ICareerProfileService, CareerProfileService>();
 builder.Services.AddScoped<IResumeService, ResumeService>();
-builder.Services.AddScoped<IResumeExperienceService,ResumeExperienceService>();
-builder.Services.AddScoped<IResumeEducationService,ResumeEducationService>();
-builder.Services.AddScoped<IResumeProjectService,ResumeProjectService>();
-builder.Services.AddScoped<IJobApplicationService,JobApplicationService>();
+builder.Services.AddScoped<IResumeExperienceService, ResumeExperienceService>();
+builder.Services.AddScoped<IResumeEducationService, ResumeEducationService>();
+builder.Services.AddScoped<IResumeProjectService, ResumeProjectService>();
+builder.Services.AddScoped<IJobApplicationService, JobApplicationService>();
 
-var aiProvider = builder.Configuration["AI:Provider"];
+var aiProvider = builder.Configuration["AI:Provider"]
+    ?? throw new InvalidOperationException("AI provider is not configured.");
 
 if (aiProvider == "Mock")
 {
@@ -58,15 +55,12 @@ if (aiProvider == "Mock")
 }
 else
 {
-    throw new InvalidOperationException(
-        $"Unsupported AI provider: {aiProvider}");
+    throw new InvalidOperationException($"Unsupported AI provider: {aiProvider}");
 }
 
 builder.Services.AddScoped<IAiService, AiService>();
-
 builder.Services.AddScoped<IPasswordHasher<User>, PasswordHasher<User>>();
 
-// Learn more about configuring OpenAPI at https://aka.ms/aspnet/openapi
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen(options =>
 {
@@ -90,9 +84,10 @@ builder.Services.AddProblemDetails();
 
 var jwtKey = builder.Configuration["Jwt:Key"]
     ?? throw new InvalidOperationException("JWT key is not configured.");
-
-var jwtIssuer = builder.Configuration["Jwt:Issuer"];
-var jwtAudience = builder.Configuration["Jwt:Audience"];
+var jwtIssuer = builder.Configuration["Jwt:Issuer"]
+    ?? throw new InvalidOperationException("JWT issuer is not configured.");
+var jwtAudience = builder.Configuration["Jwt:Audience"]
+    ?? throw new InvalidOperationException("JWT audience is not configured.");
 
 builder.Services
     .AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
@@ -104,10 +99,8 @@ builder.Services
             ValidateAudience = true,
             ValidateLifetime = true,
             ValidateIssuerSigningKey = true,
-
             ValidIssuer = jwtIssuer,
             ValidAudience = jwtAudience,
-
             IssuerSigningKey = new SymmetricSecurityKey(
                 Encoding.UTF8.GetBytes(jwtKey))
         };
@@ -115,22 +108,30 @@ builder.Services
 
 builder.Services.AddAuthorization();
 
+var allowedOrigins = builder.Configuration
+    .GetSection("Cors:AllowedOrigins")
+    .Get<string[]>() ?? [];
+
 builder.Services.AddCors(options =>
 {
-    options.AddPolicy("AngularDev", policy =>
+    options.AddPolicy("Frontend", policy =>
     {
-        policy
-            .WithOrigins("http://localhost:4200")
-            .AllowAnyHeader()
-            .AllowAnyMethod();
+        if (allowedOrigins.Length > 0)
+        {
+            policy
+                .WithOrigins(allowedOrigins)
+                .AllowAnyHeader()
+                .AllowAnyMethod();
+        }
     });
 });
+
+builder.Services.AddHealthChecks();
 
 var app = builder.Build();
 
 app.UseExceptionHandler();
 
-// Configure the HTTP request pipeline.
 if (app.Environment.IsDevelopment())
 {
     app.UseSwagger();
@@ -138,13 +139,11 @@ if (app.Environment.IsDevelopment())
 }
 
 app.UseHttpsRedirection();
-
-app.UseCors("AngularDev");
-
+app.UseCors("Frontend");
 app.UseAuthentication();
-
 app.UseAuthorization();
 
 app.MapControllers();
+app.MapHealthChecks("/health");
 
 app.Run();
