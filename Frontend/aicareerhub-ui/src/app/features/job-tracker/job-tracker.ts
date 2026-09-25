@@ -23,6 +23,8 @@ export class JobTracker implements OnInit {
 
   editingApplicationId: string | null = null;
 
+  readonly today = new Date().toISOString().split('T')[0];
+
   jobForm;
 
   filterForm;
@@ -37,7 +39,7 @@ export class JobTracker implements OnInit {
 
       jobTitle: ['', [Validators.required, Validators.maxLength(150)]],
 
-      jobUrl: [''],
+      jobUrl: ['', [Validators.pattern(/^https?:\/\/.+/)]],
 
       location: ['', [Validators.required, Validators.maxLength(150)]],
 
@@ -117,16 +119,14 @@ export class JobTracker implements OnInit {
 
     const formValue = this.jobForm.getRawValue();
 
-    /*
-     * Optional text fields are converted to null.
-     *
-     * This is especially important for jobUrl because
-     * the backend uses [Url].
-     *
-     * Sending "" would fail URL validation.
-     */
     const request = {
       ...formValue,
+
+      companyName: formValue.companyName.trim(),
+
+      jobTitle: formValue.jobTitle.trim(),
+
+      location: formValue.location.trim(),
 
       jobUrl: formValue.jobUrl.trim() || null,
 
@@ -208,7 +208,6 @@ export class JobTracker implements OnInit {
       notes: application.notes ?? '',
     });
 
-    // Move user back to the form
     window.scrollTo({
       top: 0,
       behavior: 'smooth',
@@ -244,8 +243,6 @@ export class JobTracker implements OnInit {
       next: () => {
         this.successMessage = 'Job application deleted successfully.';
 
-        // If the application currently being edited
-        // was deleted, reset the form.
         if (this.editingApplicationId === application.id) {
           this.editingApplicationId = null;
 
