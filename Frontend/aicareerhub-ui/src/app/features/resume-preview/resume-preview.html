@@ -1,0 +1,253 @@
+<app-navbar></app-navbar>
+
+<main class="preview-page">
+
+  <div class="preview-toolbar no-print">
+
+    <a routerLink="/resumes" class="back-link">
+      ← Back to Resumes
+    </a>
+
+    @if (resumeId) {
+      <div class="toolbar-actions">
+
+        <a
+          [routerLink]="['/resumes', resumeId, 'edit']"
+          class="secondary-button">
+          Edit Resume
+        </a>
+
+        <button
+          type="button"
+          class="primary-button"
+          (click)="printResume()">
+          Print / Save PDF
+        </button>
+
+      </div>
+    }
+
+  </div>
+
+  @if (isLoading) {
+
+    <div class="state-card">
+      <p>Loading resume preview...</p>
+    </div>
+
+  } @else if (errorMessage) {
+
+    <div class="error-message">
+      {{ errorMessage }}
+    </div>
+
+  } @else if (resume) {
+
+    <article class="resume-document">
+
+      <!-- ======================================= -->
+      <!-- HEADER -->
+      <!-- ======================================= -->
+
+      <header class="resume-header">
+
+        <h1>{{ resume.title }}</h1>
+
+        @if (resume.professionalSummary) {
+          <p class="professional-summary">
+            {{ resume.professionalSummary }}
+          </p>
+        }
+
+      </header>
+
+      <!-- ======================================= -->
+      <!-- SKILLS -->
+      <!-- ======================================= -->
+
+      @if (resume.skills) {
+
+        <section class="resume-section">
+
+          <h2>Skills</h2>
+
+          <div class="section-line"></div>
+
+          <p class="skills">
+            {{ resume.skills }}
+          </p>
+
+        </section>
+
+      }
+
+      <!-- ======================================= -->
+      <!-- EXPERIENCE -->
+      <!-- ======================================= -->
+
+      @if (experiences.length > 0) {
+
+        <section class="resume-section">
+
+          <h2>Work Experience</h2>
+
+          <div class="section-line"></div>
+
+          @for (experience of experiences; track experience.id) {
+
+            <div class="resume-entry">
+
+              <div class="entry-header">
+
+                <div>
+
+                  <h3>
+                    {{ experience.jobTitle }}
+                  </h3>
+
+                  <p class="entry-subtitle">
+                    {{ experience.company }}
+                  </p>
+
+                </div>
+
+                <p class="entry-date">
+
+                  {{ experience.startDate | date: 'MMM yyyy' }}
+
+                  —
+
+                  @if (experience.isCurrent) {
+                    Present
+                  } @else {
+                    {{ experience.endDate | date: 'MMM yyyy' }}
+                  }
+
+                </p>
+
+              </div>
+
+              @if (experience.description) {
+                <p class="entry-description">
+                  {{ experience.description }}
+                </p>
+              }
+
+            </div>
+
+          }
+
+        </section>
+
+      }
+
+      <!-- ======================================= -->
+      <!-- EDUCATION -->
+      <!-- ======================================= -->
+
+      @if (educations.length > 0) {
+
+        <section class="resume-section">
+
+          <h2>Education</h2>
+
+          <div class="section-line"></div>
+
+          @for (education of educations; track education.id) {
+
+            <div class="resume-entry">
+
+              <div class="entry-header">
+
+                <div>
+
+                  <h3>
+                    {{ education.degree }}
+                  </h3>
+
+                  <p class="entry-subtitle">
+                    {{ education.institution }}
+                  </p>
+
+                  @if (education.fieldOfStudy) {
+                    <p class="field-of-study">
+                      {{ education.fieldOfStudy }}
+                    </p>
+                  }
+
+                </div>
+
+                <p class="entry-date">
+
+                  {{ education.startYear }}
+
+                  —
+
+                  {{ education.endYear ?? 'Present' }}
+
+                </p>
+
+              </div>
+
+            </div>
+
+          }
+
+        </section>
+
+      }
+
+      <!-- ======================================= -->
+      <!-- PROJECTS -->
+      <!-- ======================================= -->
+
+      @if (projects.length > 0) {
+
+        <section class="resume-section">
+
+          <h2>Projects</h2>
+
+          <div class="section-line"></div>
+
+          @for (project of projects; track project.id) {
+
+            <div class="resume-entry">
+
+              <h3>
+                {{ project.name }}
+              </h3>
+
+              <p class="project-technologies">
+                <strong>Technologies:</strong>
+                {{ project.technologies }}
+              </p>
+
+              <p class="entry-description">
+                {{ project.description }}
+              </p>
+
+              @if (project.projectUrl) {
+
+                <a
+                  class="project-link"
+                  [href]="project.projectUrl"
+                  target="_blank"
+                  rel="noopener noreferrer">
+                  {{ project.projectUrl }}
+                </a>
+
+              }
+
+            </div>
+
+          }
+
+        </section>
+
+      }
+
+    </article>
+
+  }
+
+</main>

@@ -4,12 +4,11 @@
   <header class="page-header">
     <div>
       <h1>My Resumes</h1>
+
       <p>Create, manage and improve resumes for your job applications.</p>
     </div>
 
-    <a routerLink="/resumes/new" class="primary-button">
-      Create New Resume
-    </a>
+    <a routerLink="/resumes/new" class="primary-button"> Create New Resume </a>
   </header>
 
   @if (errorMessage) {
@@ -37,19 +36,16 @@
 
         <h2>No resumes yet</h2>
 
-        <p>
-          Create your first resume and start building your professional profile.
-        </p>
+        <p>Create your first resume and start building your professional profile.</p>
 
-        <a routerLink="/resumes/new" class="primary-button">
-          Create Your First Resume
-        </a>
+        <a routerLink="/resumes/new" class="primary-button"> Create Your First Resume </a>
       </section>
     } @else {
       <section class="resume-section">
         <div class="section-header">
           <div>
             <h2>Your Resumes</h2>
+
             <p>
               {{ resumes.length }}
               {{ resumes.length === 1 ? 'resume' : 'resumes' }}
@@ -65,11 +61,11 @@
                 <div class="resume-icon">CV</div>
 
                 <div class="resume-title">
-                  <h3>{{ resume.title }}</h3>
+                  <h3>
+                    {{ resume.title }}
+                  </h3>
 
-                  <span>
-                    Updated {{ resume.updatedAt | date: 'mediumDate' }}
-                  </span>
+                  <span> Updated {{ resume.updatedAt | date: 'mediumDate' }} </span>
                 </div>
               </div>
 
@@ -78,29 +74,31 @@
                   {{ resume.professionalSummary }}
                 </p>
               } @else {
-                <p class="resume-summary muted">
-                  No professional summary added yet.
-                </p>
+                <p class="resume-summary muted">No professional summary added yet.</p>
               }
 
               @if (resume.skills) {
                 <div class="resume-skills">
-                  <span class="detail-label">Skills</span>
-                  <p>{{ resume.skills }}</p>
+                  <span class="detail-label"> Skills </span>
+
+                  <p>
+                    {{ resume.skills }}
+                  </p>
                 </div>
               }
 
               <div class="resume-actions">
-                <a
-                  [routerLink]="['/resumes', resume.id, 'edit']"
-                  class="primary-action">
-                  Open Resume
-                </a>
+                <div class="resume-primary-actions">
+                  <a [routerLink]="['/resumes', resume.id, 'preview']" class="preview-action">
+                    Preview
+                  </a>
 
-                <button
-                  type="button"
-                  class="delete-button"
-                  (click)="deleteResume(resume)">
+                  <a [routerLink]="['/resumes', resume.id, 'edit']" class="primary-action">
+                    Edit Resume
+                  </a>
+                </div>
+
+                <button type="button" class="delete-button" (click)="deleteResume(resume)">
                   Delete
                 </button>
               </div>
