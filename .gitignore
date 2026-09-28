@@ -23,3 +23,6 @@ dist/
 # OS files
 Thumbs.db
 .DS_Store
+
+# AWS Lambda deployment packages
+*.zip
