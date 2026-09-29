@@ -26,3 +26,6 @@ Thumbs.db
 
 # AWS Lambda deployment packages
 *.zip
+
+# Visual Studio publish profiles
+**/Properties/PublishProfiles/
