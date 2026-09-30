@@ -1,4 +1,4 @@
 export const environment = {
   production: true,
-  apiUrl: 'https://REPLACE-WITH-PRODUCTION-API/api'
+  apiUrl: 'http://aicareerhub-api.us-east-1.elasticbeanstalk.com/api'
 };
