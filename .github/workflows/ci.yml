@@ -117,7 +117,6 @@ jobs:
           zip -r ../deployment.zip .
 
       - name: Generate deployment version
-        id: version
         run: echo "VERSION_LABEL=aicareerhub-${GITHUB_SHA}-${GITHUB_RUN_NUMBER}" >> "$GITHUB_ENV"
 
       - name: Find Elastic Beanstalk S3 bucket
@@ -164,3 +163,62 @@ jobs:
             --region "${AWS_REGION}" \
             --query 'Environments[0].[Status,Health,HealthStatus,VersionLabel]' \
             --output table
+
+
+  # =========================================================
+  # FRONTEND - DEPLOY TO AWS S3
+  # =========================================================
+  deploy-frontend:
+    name: Deploy Frontend to AWS S3
+    runs-on: ubuntu-latest
+
+    needs:
+      - backend
+      - frontend
+
+    if: github.event_name == 'push' && github.ref == 'refs/heads/main'
+
+    env:
+      AWS_REGION: us-east-1
+      S3_BUCKET: aicareerhub-ui
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+          cache: npm
+          cache-dependency-path: Frontend/aicareerhub-ui/package-lock.json
+
+      - name: Install frontend dependencies
+        working-directory: Frontend/aicareerhub-ui
+        run: npm ci
+
+      - name: Build Angular application
+        working-directory: Frontend/aicareerhub-ui
+        run: npm run build
+
+      - name: Configure AWS credentials
+        uses: aws-actions/configure-aws-credentials@v5
+        with:
+          role-to-assume: ${{ vars.AWS_ROLE_ARN }}
+          aws-region: ${{ env.AWS_REGION }}
+
+      - name: Verify AWS identity
+        run: aws sts get-caller-identity
+
+      - name: Verify Angular build output
+        run: |
+          echo "Angular dist contents:"
+          find Frontend/aicareerhub-ui/dist -maxdepth 3 -type f | head -50
+
+      - name: Deploy frontend to S3
+        run: |
+          aws s3 sync \
+            Frontend/aicareerhub-ui/dist/aicareerhub-ui/browser/ \
+            "s3://${S3_BUCKET}/browser/" \
+            --delete \
+            --region "${AWS_REGION}"
