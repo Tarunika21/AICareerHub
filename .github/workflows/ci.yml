@@ -24,10 +24,10 @@ jobs:
           dotnet-version: '10.0.x'
 
       - name: Restore backend dependencies
-        run: dotnet restore Backend/AICareerHub.API/AICareerHub.API.csproj
+  	run: dotnet restore Backend/AICareerHub.API/AICareerHub.API/AICareerHub.API.csproj
 
-      - name: Build backend
-        run: dotnet build Backend/AICareerHub.API/AICareerHub.API.csproj --configuration Release --no-restore
+- name: Build backend
+  run: dotnet build Backend/AICareerHub.API/AICareerHub.API/AICareerHub.API.csproj --configuration Release --no-restore
 
       - name: Run backend tests
         run: dotnet test Backend/AICareerHub.API/AICareerHub.API.Tests/AICareerHub.API.Tests.csproj --configuration Release
