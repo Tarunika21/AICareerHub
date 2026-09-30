@@ -59,7 +59,7 @@ jobs:
         uses: actions/setup-node@v4
         with:
           node-version: '22'
-          cache: 'npm'
+          cache: npm
           cache-dependency-path: Frontend/aicareerhub-ui/package-lock.json
 
       - name: Install frontend dependencies
@@ -70,7 +70,7 @@ jobs:
 
 
   # =========================================================
-  # DEPLOY BACKEND TO AWS ELASTIC BEANSTALK
+  # BACKEND - DEPLOY TO AWS ELASTIC BEANSTALK
   # =========================================================
   deploy-backend:
     name: Deploy Backend to AWS
@@ -80,9 +80,12 @@ jobs:
       - backend
       - frontend
 
-    # Deploy only when code is pushed/merged into main.
-    # Pull requests will build and test but will NOT deploy.
     if: github.event_name == 'push' && github.ref == 'refs/heads/main'
+
+    env:
+      AWS_REGION: us-east-1
+      EB_APPLICATION_NAME: AICareerHub
+      EB_ENVIRONMENT_NAME: aicareerhub-api
 
     steps:
       - name: Checkout repository
@@ -93,73 +96,71 @@ jobs:
         with:
           dotnet-version: '10.0.x'
 
-      # Authenticate to AWS using GitHub OIDC.
-      # No AWS access key or secret key is stored in GitHub.
       - name: Configure AWS credentials
         uses: aws-actions/configure-aws-credentials@v5
         with:
           role-to-assume: ${{ vars.AWS_ROLE_ARN }}
-          aws-region: ${{ vars.AWS_REGION }}
+          aws-region: ${{ env.AWS_REGION }}
 
-      # Publish the ASP.NET Core application.
+      - name: Verify AWS identity
+        run: aws sts get-caller-identity
+
       - name: Publish backend
-        run: >
-          dotnet publish
-          Backend/AICareerHub.API/AICareerHub.API/AICareerHub.API.csproj
-          --configuration Release
-          --output ./publish
+        run: |
+          dotnet publish Backend/AICareerHub.API/AICareerHub.API/AICareerHub.API.csproj \
+            --configuration Release \
+            --output ./publish
 
-      # Elastic Beanstalk requires a deployment bundle.
       - name: Create deployment package
         run: |
           cd publish
-          zip -r ../aicareerhub-api.zip .
+          zip -r ../deployment.zip .
 
-      # Every deployment needs a unique Elastic Beanstalk
-      # application version label.
-      - name: Generate version label
-        run: echo "VERSION_LABEL=aicareerhub-${GITHUB_SHA::7}-${GITHUB_RUN_NUMBER}" >> "$GITHUB_ENV"
+      - name: Generate deployment version
+        id: version
+        run: echo "VERSION_LABEL=aicareerhub-${GITHUB_SHA}-${GITHUB_RUN_NUMBER}" >> "$GITHUB_ENV"
 
-      # Determine the standard Elastic Beanstalk S3 bucket
-      # for this AWS account and region.
-      - name: Determine Elastic Beanstalk S3 bucket
+      - name: Find Elastic Beanstalk S3 bucket
         run: |
-          ACCOUNT_ID=$(aws sts get-caller-identity --query Account --output text)
-          BUCKET="elasticbeanstalk-${{ vars.AWS_REGION }}-${ACCOUNT_ID}"
+          BUCKET=$(aws elasticbeanstalk create-storage-location \
+            --region "${AWS_REGION}" \
+            --query 'S3Bucket' \
+            --output text)
 
           echo "EB_BUCKET=$BUCKET" >> "$GITHUB_ENV"
+          echo "Elastic Beanstalk bucket: $BUCKET"
 
-      # Upload the published application bundle.
       - name: Upload deployment package to S3
         run: |
-          aws s3 cp aicareerhub-api.zip \
-            "s3://${EB_BUCKET}/github-actions/${VERSION_LABEL}.zip"
+          aws s3 cp deployment.zip \
+            "s3://${EB_BUCKET}/${VERSION_LABEL}.zip" \
+            --region "${AWS_REGION}"
 
-      # Register the uploaded ZIP as a new application version.
       - name: Create Elastic Beanstalk application version
         run: |
           aws elasticbeanstalk create-application-version \
-            --application-name "AICareerHub" \
+            --application-name "${EB_APPLICATION_NAME}" \
             --version-label "${VERSION_LABEL}" \
-            --source-bundle S3Bucket="${EB_BUCKET}",S3Key="github-actions/${VERSION_LABEL}.zip"
+            --source-bundle S3Bucket="${EB_BUCKET}",S3Key="${VERSION_LABEL}.zip" \
+            --region "${AWS_REGION}"
 
-      # Deploy that version to the existing environment.
       - name: Deploy to Elastic Beanstalk
         run: |
           aws elasticbeanstalk update-environment \
-            --environment-name "aicareerhub-api" \
-            --version-label "${VERSION_LABEL}"
+            --environment-name "${EB_ENVIRONMENT_NAME}" \
+            --version-label "${VERSION_LABEL}" \
+            --region "${AWS_REGION}"
 
-      # Wait until Elastic Beanstalk finishes the deployment.
-      - name: Wait for deployment
+      - name: Wait for Elastic Beanstalk deployment
         run: |
           aws elasticbeanstalk wait environment-updated \
-            --environment-names "aicareerhub-api"
+            --environment-names "${EB_ENVIRONMENT_NAME}" \
+            --region "${AWS_REGION}"
 
-      # Print the final deployment status.
-      - name: Verify environment health
+      - name: Verify Elastic Beanstalk health
         run: |
           aws elasticbeanstalk describe-environments \
-            --environment-names "aicareerhub-api" \
-            --query "Environments[0].[Status,Health,VersionLabel]" \
+            --environment-names "${EB_ENVIRONMENT_NAME}" \
+            --region "${AWS_REGION}" \
+            --query 'Environments[0].[Status,Health,HealthStatus,VersionLabel]' \
             --output table
