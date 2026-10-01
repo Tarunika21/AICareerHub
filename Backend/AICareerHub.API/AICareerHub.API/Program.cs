@@ -1,4 +1,3 @@
-using Amazon.Lambda.AspNetCoreServer.Hosting;
 using AICareerHub.API.AI;
 using AICareerHub.API.Common;
 using AICareerHub.API.Data;
@@ -15,7 +14,6 @@ using System.Text;
 var builder = WebApplication.CreateBuilder(args);
 
 builder.Services.AddControllers();
-builder.Services.AddAWSLambdaHosting(LambdaEventSource.HttpApi);
 
 if (builder.Environment.IsEnvironment("Testing"))
 {
